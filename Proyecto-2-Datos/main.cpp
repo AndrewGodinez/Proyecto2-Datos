@@ -5,6 +5,8 @@
 #include "Cola.h"
 #include "Grafo.h"
 #include "Dijkstra.h"
+#include "Ordenamiento.h"
+#include "ConjuntoDisjunto.h"
 
 using namespace std;
 using namespace sf;
@@ -21,24 +23,16 @@ int main() {
 	mapa.agregarRuta(sjo, pty, 180.0, 1.5);
 	mapa.agregarRuta(pty, mad, 520.0, 10.5);
 	
-	ResultadoRuta rutaPasajero = Dijkstra::calcularRuta(mapa, sjo, mad, CRITERIO_DURACION);
-	ResultadoRuta rutaMaleta = Dijkstra::calcularRutaEquipaje(mapa, sjo, mad, CRITERIO_COSTO, rutaPasajero);
+	AristaRuta listaRutas[MAX_CIUDADES * MAX_CIUDADES];
+	int totalRutas = mapa.obtenerTodasLasRutas(listaRutas);
+	Ordenamiento::ordenarRutas(listaRutas, totalRutas, CRITERIO_COSTO);
 	
-	if (rutaPasajero.existe) {
-		cout << "[OK] Ruta Pasajero (mas rapida): ";
-		for (int i = 0; i < rutaPasajero.cantidadNodos; i++) {
-			cout << mapa.getCiudad(rutaPasajero.nodos[i]).codigo << " ";
-		}
-		cout << "| $" << rutaPasajero.costoTotal << " | " << rutaPasajero.duracionTotal << " hrs\n";
-	}
+	cout << "[OK] Ruta mas barata tras MergeSort: " << mapa.getCiudad(listaRutas[0].origen).codigo << " -> " << mapa.getCiudad(listaRutas[0].destino).codigo << " ($" << listaRutas[0].costo << ")\n";
 	
-	if (rutaMaleta.existe) {
-		cout << "[OK] Ruta Equipaje (mas barata): ";
-		for (int i = 0; i < rutaMaleta.cantidadNodos; i++) {
-			cout << mapa.getCiudad(rutaMaleta.nodos[i]).codigo << " ";
-		}
-		cout << "| $" << rutaMaleta.costoTotal << " | " << rutaMaleta.duracionTotal << " hrs\n";
-	}
+	ConjuntoDisjunto componentes;
+	componentes.inicializar(mapa.getCantidadCiudades());
+	componentes.unir(sjo, mia);
+	cout << "[OK] SJO y MIA conectados: " << (componentes.mismoConjunto(sjo, mia) ? "SI" : "NO") << "\n";
 	
 	RenderWindow ventana(VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "Aerolinea UNA - EIF207");
 	ventana.setFramerateLimit(60);
