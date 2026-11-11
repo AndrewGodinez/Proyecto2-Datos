@@ -1,0 +1,2 @@
+SJO;San Jose;220;310
+MIA;Miami;460;170

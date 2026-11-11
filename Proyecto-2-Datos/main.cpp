@@ -1,22 +1,28 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Constantes.h"
-#include "Texto.h"
+#include "Grafo.h"
 #include "Modelos.h"
+#include "Persistencia.h"
 
 using namespace std;
 using namespace sf;
 
 int main() {
-	string lineaAeronave = "AV01;Boeing 737-800;180;Operativo";
-	string campos[10];
-	int totalCampos = Texto::dividirPorPuntoYComa(lineaAeronave, campos, 10);
+	Grafo mapa;
+	mapa.agregarCiudad("SJO", "San Jose", 220.0f, 310.0f);
+	mapa.agregarCiudad("MIA", "Miami", 460.0f, 170.0f);
+	mapa.agregarRuta(0, 1, 320.0, 3.0);
 	
-	if (totalCampos >= 4) {
-		Aeronave avion = Modelos::crearAeronave(campos);
-		cout << "[OK] Aeronave leida: " << avion.codigo << " | " << avion.modelo << " | Cap: " << avion.capacidad << "\n";
-		cout << "[OK] Formato guardado: " << Modelos::formatearAeronave(avion) << "\n";
-	}
+	Persistencia::guardarCiudades("ciudades.txt", mapa);
+	Persistencia::guardarRutas("rutas.txt", mapa);
+	
+	Grafo mapaCargado;
+	Persistencia::cargarCiudades("ciudades.txt", mapaCargado);
+	Persistencia::cargarRutas("rutas.txt", mapaCargado);
+	
+	cout << "[OK] Ciudades cargadas desde archivo: " << mapaCargado.getCantidadCiudades() << "\n";
+	cout << "[OK] Costo SJO->MIA cargado: $" << mapaCargado.getCostoRuta(0, 1) << "\n";
 	
 	RenderWindow ventana(VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "Aerolinea UNA - EIF207");
 	ventana.setFramerateLimit(60);
