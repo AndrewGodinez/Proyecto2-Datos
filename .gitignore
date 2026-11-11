@@ -74,6 +74,9 @@ proyecto tetris/
 *.pdf
 *.html
 *.md
+!README.md
+!ENUNCIADO.md
+!informe/*.md
 *.wud
 Debug/
 Release/
