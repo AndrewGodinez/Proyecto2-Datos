@@ -8,28 +8,22 @@
 #include "Ordenamiento.h"
 #include "ConjuntoDisjunto.h"
 #include "PrimKruskal.h"
+#include "ArbolAVL.h"
 
 using namespace std;
 using namespace sf;
 
 int main() {
-	Grafo mapa;
-	int sjo = mapa.agregarCiudad("SJO", "San Jose", 220.0f, 310.0f);
-	int pty = mapa.agregarCiudad("PTY", "Panama", 310.0f, 350.0f);
-	int mia = mapa.agregarCiudad("MIA", "Miami", 460.0f, 170.0f);
-	int mad = mapa.agregarCiudad("MAD", "Madrid", 880.0f, 150.0f);
+	ArbolAVL avlPasajeros;
+	avlPasajeros.insertar(10, "Carlos", "Vuelo SJO-MIA");
+	avlPasajeros.insertar(20, "Ana", "Vuelo MIA-MAD");
+	avlPasajeros.insertar(30, "Luis", "Vuelo SJO-PTY");
+	avlPasajeros.insertar(40, "Sofia", "Vuelo PTY-MAD");
+	avlPasajeros.insertar(50, "Elena", "Vuelo SJO-MIA");
 	
-	mapa.agregarRuta(sjo, mia, 450.0, 2.5);
-	mapa.agregarRuta(mia, mad, 500.0, 7.5);
-	mapa.agregarRuta(sjo, pty, 180.0, 1.5);
-	mapa.agregarRuta(pty, mad, 520.0, 10.5);
-	mapa.agregarRuta(pty, mia, 210.0, 2.0);
-	
-	ResultadoMST redPrim = PrimKruskal::calcularPrim(mapa, sjo);
-	ResultadoMST redKruskal = PrimKruskal::calcularKruskal(mapa, sjo);
-	
-	cout << "[OK] Prim (Menor Costo): $" << redPrim.costoTotal << " | Preorden: " << redPrim.preorden << "\n";
-	cout << "[OK] Kruskal (Menor Duracion): " << redKruskal.duracionTotal << " hrs | Anchura: " << redKruskal.anchura << "\n";
+	cout << "[OK] AVL Inorden: " << avlPasajeros.inorden() << "\n";
+	cout << "[OK] AVL Preorden (Raiz balanceada): " << avlPasajeros.preorden() << "\n";
+	cout << "[OK] AVL Anchura: " << avlPasajeros.anchura() << "\n";
 	
 	RenderWindow ventana(VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "Aerolinea UNA - EIF207");
 	ventana.setFramerateLimit(60);
