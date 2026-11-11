@@ -1,16 +1,16 @@
-#include "ColaEnteros.h"
+#include "Cola.h"
 
-ColaEnteros::ColaEnteros() {
+Cola::Cola() {
 	frente = nullptr;
 	ultimo = nullptr;
 	cantidad = 0;
 }
 
-ColaEnteros::~ColaEnteros() {
+Cola::~Cola() {
 	vaciar();
 }
 
-void ColaEnteros::encolar(int valor) {
+void Cola::encolar(int valor) {
 	NodoCola* nuevo = new NodoCola{ valor, nullptr };
 	if (estaVacia()) {
 		frente = nuevo;
@@ -21,7 +21,7 @@ void ColaEnteros::encolar(int valor) {
 	cantidad++;
 }
 
-int ColaEnteros::desencolar() {
+int Cola::desencolar() {
 	if (estaVacia()) {
 		return -1;
 	}
@@ -36,14 +36,14 @@ int ColaEnteros::desencolar() {
 	return valor;
 }
 
-int ColaEnteros::verFrente() const {
+int Cola::verFrente() const {
 	if (estaVacia()) {
 		return -1;
 	}
 	return frente->valor;
 }
 
-int ColaEnteros::verPosicion(int pos) const {
+int Cola::verPosicion(int pos) const {
 	NodoCola* actual = frente;
 	int i = 0;
 	while (actual != nullptr && i < pos) {
@@ -56,15 +56,15 @@ int ColaEnteros::verPosicion(int pos) const {
 	return actual->valor;
 }
 
-bool ColaEnteros::estaVacia() const {
+bool Cola::estaVacia() const {
 	return frente == nullptr;
 }
 
-int ColaEnteros::tamanio() const {
+int Cola::tamanio() const {
 	return cantidad;
 }
 
-void ColaEnteros::vaciar() {
+void Cola::vaciar() {
 	while (!estaVacia()) {
 		desencolar();
 	}

@@ -1,31 +1,31 @@
-#ifndef COLAENTEROS_H
-#define COLAENTEROS_H
+#ifndef COLA_H
+#define COLA_H
 
 struct NodoCola {
 	int valor;
 	NodoCola* siguiente;
 };
 
-class ColaEnteros {
+class Cola {
 private:
 	NodoCola* frente;
 	NodoCola* ultimo;
 	int cantidad;
 	
 public:
-	ColaEnteros();
-	~ColaEnteros();
+	Cola();
+	~Cola();
 	
-	void encolar(int valor);         
-	int desencolar();                
-	int verFrente() const;          
-	int verPosicion(int pos) const; 
+	void encolar(int valor);
+	int desencolar();
+	int verFrente() const;
+	int verPosicion(int pos) const;
 	bool estaVacia() const;
 	int tamanio() const;
-	void vaciar();           
+	void vaciar();
 	
-	ColaEnteros(const ColaEnteros&) = delete;
-	ColaEnteros& operator=(const ColaEnteros&) = delete;
+	Cola(const Cola&) = delete;
+	Cola& operator=(const Cola&) = delete;
 };
 
 #endif

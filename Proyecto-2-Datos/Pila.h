@@ -1,29 +1,29 @@
-#ifndef PILAENTEROS_H
-#define PILAENTEROS_H
+#ifndef PILA_H
+#define PILA_H
 
 struct NodoPila {
 	int valor;
 	NodoPila* siguiente;
 };
 
-class PilaEnteros {
+class Pila {
 private:
 	NodoPila* tope;
 	int cantidad;
 	
 public:
-	PilaEnteros();
-	~PilaEnteros();
+	Pila();
+	~Pila();
 	
 	void apilar(int valor);
-	int desapilar();     
-	int verTope() const;  
+	int desapilar();
+	int verTope() const;
 	bool estaVacia() const;
 	int tamanio() const;
 	void vaciar();
 	
-	PilaEnteros(const PilaEnteros&) = delete;
-	PilaEnteros& operator=(const PilaEnteros&) = delete;
+	Pila(const Pila&) = delete;
+	Pila& operator=(const Pila&) = delete;
 };
 
 #endif

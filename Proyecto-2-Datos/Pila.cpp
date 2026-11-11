@@ -1,21 +1,21 @@
-#include "PilaEnteros.h"
+#include "Pila.h"
 
-PilaEnteros::PilaEnteros() {
+Pila::Pila() {
 	tope = nullptr;
 	cantidad = 0;
 }
 
-PilaEnteros::~PilaEnteros() {
+Pila::~Pila() {
 	vaciar();
 }
 
-void PilaEnteros::apilar(int valor) {
+void Pila::apilar(int valor) {
 	NodoPila* nuevo = new NodoPila{ valor, tope };
 	tope = nuevo;
 	cantidad++;
 }
 
-int PilaEnteros::desapilar() {
+int Pila::desapilar() {
 	if (estaVacia()) {
 		return -1;
 	}
@@ -27,22 +27,22 @@ int PilaEnteros::desapilar() {
 	return valor;
 }
 
-int PilaEnteros::verTope() const {
+int Pila::verTope() const {
 	if (estaVacia()) {
 		return -1;
 	}
 	return tope->valor;
 }
 
-bool PilaEnteros::estaVacia() const {
+bool Pila::estaVacia() const {
 	return tope == nullptr;
 }
 
-int PilaEnteros::tamanio() const {
+int Pila::tamanio() const {
 	return cantidad;
 }
 
-void PilaEnteros::vaciar() {
+void Pila::vaciar() {
 	while (!estaVacia()) {
 		desapilar();
 	}

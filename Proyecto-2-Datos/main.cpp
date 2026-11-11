@@ -1,30 +1,36 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Constantes.h"
-#include "PilaEnteros.h"
-#include "ColaEnteros.h"
+#include "Pila.h"
+#include "Cola.h"
+#include "Grafo.h"
 
 using namespace std;
 using namespace sf;
 
 int main() {
-	Ciudad c1 = { 0, "SJO", "San Jose", 220.0f, 310.0f };
-	Ciudad c2 = { 1, "MIA", "Miami", 460.0f, 170.0f };
-	cout << "[OK] Ruta inicial: " << c1.codigo << " -> " << c2.codigo << "\n";
+	Grafo mapa;
+	int sjo = mapa.agregarCiudad("SJO", "San Jose", 220.0f, 310.0f);
+	int mia = mapa.agregarCiudad("MIA", "Miami", 460.0f, 170.0f);
+	int mad = mapa.agregarCiudad("MAD", "Madrid", 880.0f, 150.0f);
 	
-	PilaEnteros pilaCamino;
-	pilaCamino.apilar(0);
-	pilaCamino.apilar(1);
-	pilaCamino.apilar(2);
-	cout << "[OK] Tope en PilaEnteros: " << pilaCamino.verTope() << "\n";
-	cout << "[OK] Desapilando: " << pilaCamino.desapilar() << "\n";
+	mapa.agregarRuta(sjo, mia, 320.0, 3.0);
+	mapa.agregarRuta(mia, mad, 610.0, 8.5);
 	
-	ColaEnteros colaAnchura;
-	colaAnchura.encolar(10);
-	colaAnchura.encolar(20);
-	colaAnchura.encolar(30);
-	cout << "[OK] Frente en ColaEnteros: " << colaAnchura.verFrente() << "\n";
-	cout << "[OK] Desencolando: " << colaAnchura.desencolar() << "\n";
+	cout << "[OK] Ciudades en Grafo: " << mapa.getCantidadCiudades() << "\n";
+	cout << "[OK] Costo SJO->MIA: $" << mapa.getCostoRuta(sjo, mia) << "\n";
+	cout << "[OK] Duracion MIA->MAD: " << mapa.getDuracionRuta(mia, mad) << " hrs\n";
+	
+	Pila pilaCamino;
+	pilaCamino.apilar(sjo);
+	pilaCamino.apilar(mia);
+	pilaCamino.apilar(mad);
+	cout << "[OK] Tope en Pila: " << mapa.getCiudad(pilaCamino.verTope()).codigo << "\n";
+	
+	Cola colaAnchura;
+	colaAnchura.encolar(sjo);
+	colaAnchura.encolar(mia);
+	cout << "[OK] Frente en Cola: " << mapa.getCiudad(colaAnchura.verFrente()).codigo << "\n";
 	
 	RenderWindow ventana(VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "Aerolinea UNA - EIF207");
 	ventana.setFramerateLimit(60);
