@@ -4,6 +4,7 @@
 #include "Pila.h"
 #include "Cola.h"
 #include "Grafo.h"
+#include "Dijkstra.h"
 
 using namespace std;
 using namespace sf;
@@ -11,26 +12,33 @@ using namespace sf;
 int main() {
 	Grafo mapa;
 	int sjo = mapa.agregarCiudad("SJO", "San Jose", 220.0f, 310.0f);
+	int pty = mapa.agregarCiudad("PTY", "Panama", 310.0f, 350.0f);
 	int mia = mapa.agregarCiudad("MIA", "Miami", 460.0f, 170.0f);
 	int mad = mapa.agregarCiudad("MAD", "Madrid", 880.0f, 150.0f);
 	
-	mapa.agregarRuta(sjo, mia, 320.0, 3.0);
-	mapa.agregarRuta(mia, mad, 610.0, 8.5);
+	mapa.agregarRuta(sjo, mia, 450.0, 2.5);
+	mapa.agregarRuta(mia, mad, 500.0, 7.5);
+	mapa.agregarRuta(sjo, pty, 180.0, 1.5);
+	mapa.agregarRuta(pty, mad, 520.0, 10.5);
 	
-	cout << "[OK] Ciudades en Grafo: " << mapa.getCantidadCiudades() << "\n";
-	cout << "[OK] Costo SJO->MIA: $" << mapa.getCostoRuta(sjo, mia) << "\n";
-	cout << "[OK] Duracion MIA->MAD: " << mapa.getDuracionRuta(mia, mad) << " hrs\n";
+	ResultadoRuta rutaPasajero = Dijkstra::calcularRuta(mapa, sjo, mad, CRITERIO_DURACION);
+	ResultadoRuta rutaMaleta = Dijkstra::calcularRutaEquipaje(mapa, sjo, mad, CRITERIO_COSTO, rutaPasajero);
 	
-	Pila pilaCamino;
-	pilaCamino.apilar(sjo);
-	pilaCamino.apilar(mia);
-	pilaCamino.apilar(mad);
-	cout << "[OK] Tope en Pila: " << mapa.getCiudad(pilaCamino.verTope()).codigo << "\n";
+	if (rutaPasajero.existe) {
+		cout << "[OK] Ruta Pasajero (mas rapida): ";
+		for (int i = 0; i < rutaPasajero.cantidadNodos; i++) {
+			cout << mapa.getCiudad(rutaPasajero.nodos[i]).codigo << " ";
+		}
+		cout << "| $" << rutaPasajero.costoTotal << " | " << rutaPasajero.duracionTotal << " hrs\n";
+	}
 	
-	Cola colaAnchura;
-	colaAnchura.encolar(sjo);
-	colaAnchura.encolar(mia);
-	cout << "[OK] Frente en Cola: " << mapa.getCiudad(colaAnchura.verFrente()).codigo << "\n";
+	if (rutaMaleta.existe) {
+		cout << "[OK] Ruta Equipaje (mas barata): ";
+		for (int i = 0; i < rutaMaleta.cantidadNodos; i++) {
+			cout << mapa.getCiudad(rutaMaleta.nodos[i]).codigo << " ";
+		}
+		cout << "| $" << rutaMaleta.costoTotal << " | " << rutaMaleta.duracionTotal << " hrs\n";
+	}
 	
 	RenderWindow ventana(VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "Aerolinea UNA - EIF207");
 	ventana.setFramerateLimit(60);
