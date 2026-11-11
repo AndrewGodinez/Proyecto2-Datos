@@ -66,3 +66,14 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+
+# Ignorar archivos externos, skills, referencia y planeacion
+.agents/
+proyecto tetris/
+*.pdf
+*.html
+*.md
+*.wud
+Debug/
+Release/
