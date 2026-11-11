@@ -254,3 +254,40 @@ Reserva getReservaVacia() {
 Reserva Aerolinea::getReserva(int indice) const {
 	return (indice >= 0 && indice < cantidadReservas) ? reservas[indice] : getReservaVacia(); 
 }
+
+#if __has_include("BellmanFord.h")
+#include "BellmanFord.h"
+#endif
+#if __has_include("ArbolABB.h")
+#include "ArbolABB.h"
+#endif
+
+ResultadoRuta Aerolinea::buscarRutaBellmanFord(string codigoOrigen, string codigoDestino, int criterio) const {
+	int origen = grafo.buscarIndicePorCodigo(codigoOrigen);
+	int destino = grafo.buscarIndicePorCodigo(codigoDestino);
+#if __has_include("BellmanFord.h")
+	return BellmanFord::calcularRuta(grafo, origen, destino, criterio);
+#else
+	return Dijkstra::calcularRuta(grafo, origen, destino, criterio);
+#endif
+}
+
+string Aerolinea::obtenerCiudadesABBInorden() const {
+#if __has_include("ArbolABB.h")
+	ArbolABB abb;
+	for (int i = 0; i < grafo.getCantidadCiudades(); i++) {
+		Ciudad ciudad = grafo.getCiudad(i);
+		abb.insertar(ciudad.codigo, ciudad.nombre);
+	}
+	return abb.inorden();
+#else
+	string texto = "";
+	for (int i = 0; i < grafo.getCantidadCiudades(); i++) {
+		if (i > 0) {
+			texto += " -> ";
+		}
+		texto += grafo.getCiudad(i).codigo;
+	}
+	return texto;
+#endif
+}

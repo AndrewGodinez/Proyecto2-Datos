@@ -2,6 +2,11 @@
 #include <iostream>
 #include "Constantes.h"
 #include "Aerolinea.h"
+#include "Reporte.h"
+
+#if __has_include("Pantallas.h")
+#include "Pantallas.h"
+#endif
 
 using namespace std;
 using namespace sf;
@@ -10,18 +15,13 @@ int main() {
 	Aerolinea sistema;
 	sistema.cargarDatos();
 	
-	cout << "[OK] Ciudades cargadas: " << sistema.getGrafo().getCantidadCiudades() << "\n";
-	cout << "[OK] Aeronaves cargadas: " << sistema.getCantidadAeronaves() << "\n";
-	cout << "[OK] Tripulantes cargados: " << sistema.getCantidadTripulantes() << "\n";
-	cout << "[OK] Vuelos cargados: " << sistema.getCantidadVuelos() << "\n";
-	cout << "[OK] Reservas en AVL: " << sistema.getAvlPasajeros().tamanio() << "\n";
+	Reporte::mostrarDiagnosticoConsola(sistema);
+	Reporte::exportarReporteTxt("reporte_sistema.txt", sistema);
 	
-	ResultadoMST mstPrim = sistema.obtenerRedPrim();
-	ResultadoMST mstKruskal = sistema.obtenerRedKruskal();
-	cout << "[OK] MST Prim Costo Total: $" << mstPrim.costoTotal << " | Preorden: " << mstPrim.preorden << "\n";
-	cout << "[OK] MST Kruskal Duracion Total: " << mstKruskal.duracionTotal << " hrs | Anchura: " << mstKruskal.anchura << "\n";
-	cout << "[OK] AVL Pasajeros Inorden: " << sistema.getAvlPasajeros().inorden() << "\n";
-	
+#if __has_include("Pantallas.h")
+	Pantallas gui(sistema);
+	gui.ejecutar();
+#else
 	RenderWindow ventana(VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "Aerolinea UNA - EIF207");
 	ventana.setFramerateLimit(60);
 	
@@ -36,6 +36,7 @@ int main() {
 		ventana.clear(Color(15, 20, 32));
 		ventana.display();
 	}
+#endif
 	
 	return 0;
 }

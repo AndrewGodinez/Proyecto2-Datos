@@ -46,6 +46,8 @@ public:
 	bool cancelarReserva(int idReserva);
 	
 	ResultadoRuta buscarRutaDijkstra(string codigoOrigen, string codigoDestino, int criterio) const;
+	ResultadoRuta buscarRutaBellmanFord(string codigoOrigen, string codigoDestino, int criterio) const;
+	string obtenerCiudadesABBInorden() const;
 	ResultadoMST obtenerRedPrim() const;
 	ResultadoMST obtenerRedKruskal() const;
 	
