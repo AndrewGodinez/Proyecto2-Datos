@@ -7,6 +7,7 @@
 #include "Dijkstra.h"
 #include "Ordenamiento.h"
 #include "ConjuntoDisjunto.h"
+#include "PrimKruskal.h"
 
 using namespace std;
 using namespace sf;
@@ -22,17 +23,13 @@ int main() {
 	mapa.agregarRuta(mia, mad, 500.0, 7.5);
 	mapa.agregarRuta(sjo, pty, 180.0, 1.5);
 	mapa.agregarRuta(pty, mad, 520.0, 10.5);
+	mapa.agregarRuta(pty, mia, 210.0, 2.0);
 	
-	AristaRuta listaRutas[MAX_CIUDADES * MAX_CIUDADES];
-	int totalRutas = mapa.obtenerTodasLasRutas(listaRutas);
-	Ordenamiento::ordenarRutas(listaRutas, totalRutas, CRITERIO_COSTO);
+	ResultadoMST redPrim = PrimKruskal::calcularPrim(mapa, sjo);
+	ResultadoMST redKruskal = PrimKruskal::calcularKruskal(mapa, sjo);
 	
-	cout << "[OK] Ruta mas barata tras MergeSort: " << mapa.getCiudad(listaRutas[0].origen).codigo << " -> " << mapa.getCiudad(listaRutas[0].destino).codigo << " ($" << listaRutas[0].costo << ")\n";
-	
-	ConjuntoDisjunto componentes;
-	componentes.inicializar(mapa.getCantidadCiudades());
-	componentes.unir(sjo, mia);
-	cout << "[OK] SJO y MIA conectados: " << (componentes.mismoConjunto(sjo, mia) ? "SI" : "NO") << "\n";
+	cout << "[OK] Prim (Menor Costo): $" << redPrim.costoTotal << " | Preorden: " << redPrim.preorden << "\n";
+	cout << "[OK] Kruskal (Menor Duracion): " << redKruskal.duracionTotal << " hrs | Anchura: " << redKruskal.anchura << "\n";
 	
 	RenderWindow ventana(VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "Aerolinea UNA - EIF207");
 	ventana.setFramerateLimit(60);
