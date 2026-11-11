@@ -1,0 +1,48 @@
+REPORTE TECNICO DE ESTRUCTURAS DE DATOS - AEROLINEA UNA
+=======================================================
+
+1. RESUMEN DE ENTIDADES CARGADAS
+   - Ciudades:    10
+   - Aeronaves:   6
+   - Tripulacion: 8
+   - Vuelos:      8
+   - Reservas:    6
+
+2. OPTIMIZACION GLOBAL DE RED (MST)
+   [Prim - Menor Costo Total: $2470]
+   - Preorden:  SJO -> PTY -> BOG -> LIM -> GRU -> MIA -> JFK -> MAD -> CDG -> MEX
+   - Inorden:   GRU -> LIM -> BOG -> PTY -> CDG -> MAD -> JFK -> MIA -> SJO -> MEX
+   - Postorden: GRU -> LIM -> BOG -> CDG -> MAD -> JFK -> MIA -> PTY -> MEX -> SJO
+   - Anchura:   SJO -> PTY -> MEX -> BOG -> MIA -> LIM -> JFK -> GRU -> MAD -> CDG
+
+   [Kruskal - Menor Duracion Total: 27.8 hrs]
+   - Preorden:  SJO -> PTY -> BOG -> LIM -> GRU -> MIA -> JFK -> MAD -> CDG -> MEX
+   - Inorden:   GRU -> LIM -> BOG -> PTY -> SJO -> CDG -> MAD -> JFK -> MIA -> MEX
+   - Postorden: GRU -> LIM -> BOG -> PTY -> CDG -> MAD -> JFK -> MIA -> MEX -> SJO
+   - Anchura:   SJO -> PTY -> MIA -> MEX -> BOG -> JFK -> LIM -> MAD -> GRU -> CDG
+
+3. ARBOL BALANCEADO AVL DE PASAJEROS
+   - Preorden:  207910442:Andrew Jimenez -> 118450231:Sem Mora -> 115220890:Maria Fernanda Solis -> 119020554:Camila Brenes -> 304980115:Daniela Alvarado -> 402310778:Jorge Hernandez
+   - Inorden:   115220890:Maria Fernanda Solis -> 118450231:Sem Mora -> 119020554:Camila Brenes -> 207910442:Andrew Jimenez -> 304980115:Daniela Alvarado -> 402310778:Jorge Hernandez
+   - Postorden: 115220890:Maria Fernanda Solis -> 119020554:Camila Brenes -> 118450231:Sem Mora -> 402310778:Jorge Hernandez -> 304980115:Daniela Alvarado -> 207910442:Andrew Jimenez
+   - Anchura:   207910442:Andrew Jimenez -> 118450231:Sem Mora -> 304980115:Daniela Alvarado -> 115220890:Maria Fernanda Solis -> 119020554:Camila Brenes -> 402310778:Jorge Hernandez
+
+4. LISTADO DE RESERVAS CON RUTA DIFERENCIADA DE EQUIPAJE
+   - Reserva #101 | Sem Mora (Ced: 118450231)
+     Ruta Pasajero: SJO -> MIA -> MAD
+     Ruta Equipaje: SJO -> PTY -> BOG -> MAD
+   - Reserva #102 | Andrew Jimenez (Ced: 207910442)
+     Ruta Pasajero: SJO -> MIA -> JFK
+     Ruta Equipaje: SJO -> MEX -> JFK
+   - Reserva #103 | Maria Fernanda Solis (Ced: 115220890)
+     Ruta Pasajero: PTY -> MIA -> JFK -> CDG
+     Ruta Equipaje: PTY -> BOG -> MAD -> CDG
+   - Reserva #104 | Daniela Alvarado (Ced: 304980115)
+     Ruta Pasajero: SJO -> PTY -> BOG -> LIM
+     Ruta Equipaje: SJO -> PTY -> BOG -> LIM
+   - Reserva #105 | Jorge Hernandez (Ced: 402310778)
+     Ruta Pasajero: MEX -> JFK -> MAD
+     Ruta Equipaje: MEX -> JFK -> MAD
+   - Reserva #106 | Camila Brenes (Ced: 119020554)
+     Ruta Pasajero: SJO -> PTY -> BOG -> LIM -> GRU
+     Ruta Equipaje: SJO -> PTY -> BOG -> LIM -> GRU

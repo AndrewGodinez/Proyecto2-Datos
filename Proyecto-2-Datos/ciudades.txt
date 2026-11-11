@@ -1,0 +1,10 @@
+SJO;San Jose;260;380
+PTY;Panama;330;420
+BOG;Bogota;390;480
+MEX;Ciudad de Mexico;170;280
+MIA;Miami;360;240
+JFK;Nueva York;430;140
+LIM;Lima;400;590
+GRU;Sao Paulo;590;620
+MAD;Madrid;760;180
+CDG;Paris;810;130

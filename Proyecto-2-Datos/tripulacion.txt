@@ -1,0 +1,8 @@
+TR01;Carlos Morales;Piloto;0;VU101
+TR02;Andrea Vargas;Copiloto;0;VU101
+TR03;Roberto Solis;Piloto;0;VU102
+TR04;Elena Rojas;Sobrecargo Jefe;1;Ninguno
+TR05;Marco Jimenez;Piloto;1;Ninguno
+TR06;Lucia Castro;Copiloto;1;Ninguno
+TR07;Fernando Vega;Sobrecargo;1;Ninguno
+TR08;Valeria Mendez;Sobrecargo;1;Ninguno

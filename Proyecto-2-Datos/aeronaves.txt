@@ -1,0 +1,6 @@
+AV01;Boeing 737-800;180;Operativo
+AV02;Airbus A320neo;165;Operativo
+AV03;Boeing 787-9 Dreamliner;290;Operativo
+AV04;Airbus A350-900;325;Operativo
+AV05;Embraer E190;100;Operativo
+AV06;Boeing 737 MAX 8;178;Mantenimiento
