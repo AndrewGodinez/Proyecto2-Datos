@@ -4,6 +4,27 @@
 #include "PantallasAdmin.h"
 #include "PantallasGestion.h"
 #include <iostream>
+#include <cmath>
+
+static bool enPantallaCompleta = false;
+
+static void ajustarVistaVentana(sf::RenderWindow& ventana, unsigned int ancho, unsigned int alto) {
+	if (ancho == 0 || alto == 0) {
+		return;
+	}
+	float ratioVentana = static_cast<float>(ancho) / static_cast<float>(alto);
+	float ratioBase = static_cast<float>(ANCHO_VENTANA) / static_cast<float>(ALTO_VENTANA);
+	
+	sf::View vista(sf::FloatRect(0.0f, 0.0f, static_cast<float>(ANCHO_VENTANA), static_cast<float>(ALTO_VENTANA)));
+	if (ratioVentana >= ratioBase) {
+		float anchoViewport = ratioBase / ratioVentana;
+		vista.setViewport(sf::FloatRect((1.0f - anchoViewport) / 2.0f, 0.0f, anchoViewport, 1.0f));
+	} else {
+		float altoViewport = ratioVentana / ratioBase;
+		vista.setViewport(sf::FloatRect(0.0f, (1.0f - altoViewport) / 2.0f, 1.0f, altoViewport));
+	}
+	ventana.setView(vista);
+}
 
 App::App(Aerolinea& aerolinea) 
 	: ventana(sf::VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "Aerolinea UNA - Plataforma de Gestion y Rutas (EIF207)"),
@@ -12,6 +33,7 @@ App::App(Aerolinea& aerolinea)
 	vistaArbol(255.0f, 55.0f, 1015.0f, 475.0f) {
 	
 	ventana.setFramerateLimit(60);
+	ajustarVistaVentana(ventana, ventana.getSize().x, ventana.getSize().y);
 	Dibujo::inicializarFuente();
 	pestanaActual = PESTANA_DIJKSTRA;
 	mostrarVistaArbol = false;
@@ -82,12 +104,24 @@ void App::cambiarPestana(PestanaSistema nuevaPestana) {
 
 void App::procesarEventos() {
 	sf::Event evento;
-	sf::Vector2f posMouse(static_cast<float>(sf::Mouse::getPosition(ventana).x),
-						  static_cast<float>(sf::Mouse::getPosition(ventana).y));
 	
 	while (ventana.pollEvent(evento)) {
 		if (evento.type == sf::Event::Closed) {
 			ventana.close();
+		}
+		
+		if (evento.type == sf::Event::Resized) {
+			ajustarVistaVentana(ventana, evento.size.width, evento.size.height);
+		}
+		
+		if (evento.type == sf::Event::MouseButtonPressed || evento.type == sf::Event::MouseButtonReleased) {
+			sf::Vector2f coords = ventana.mapPixelToCoords(sf::Vector2i(evento.mouseButton.x, evento.mouseButton.y));
+			evento.mouseButton.x = static_cast<int>(std::floor(coords.x + 0.5f));
+			evento.mouseButton.y = static_cast<int>(std::floor(coords.y + 0.5f));
+		} else if (evento.type == sf::Event::MouseMoved) {
+			sf::Vector2f coords = ventana.mapPixelToCoords(sf::Vector2i(evento.mouseMove.x, evento.mouseMove.y));
+			evento.mouseMove.x = static_cast<int>(std::floor(coords.x + 0.5f));
+			evento.mouseMove.y = static_cast<int>(std::floor(coords.y + 0.5f));
 		}
 		
 		if (evento.type == sf::Event::KeyPressed && !CajaTexto::hayCajaActiva()) {
@@ -97,6 +131,18 @@ void App::procesarEventos() {
 				animacion.detener();
 			} else if (evento.key.code == sf::Keyboard::Space) {
 				animacion.alternarPausa();
+			} else if (evento.key.code == sf::Keyboard::F11) {
+				enPantallaCompleta = !enPantallaCompleta;
+				if (enPantallaCompleta) {
+					sf::VideoMode modo = sf::VideoMode::getDesktopMode();
+					ventana.create(modo, "Aerolinea UNA - Plataforma de Gestion y Rutas (EIF207)", sf::Style::Fullscreen);
+					ajustarVistaVentana(ventana, modo.width, modo.height);
+				} else {
+					ventana.create(sf::VideoMode(ANCHO_VENTANA, ALTO_VENTANA), "Aerolinea UNA - Plataforma de Gestion y Rutas (EIF207)", sf::Style::Default);
+					ajustarVistaVentana(ventana, ANCHO_VENTANA, ALTO_VENTANA);
+				}
+				ventana.setFramerateLimit(60);
+				continue;
 			}
 		}
 		
@@ -124,6 +170,8 @@ void App::procesarEventos() {
 			pantallasAdmin->procesarEvento(evento, *this);
 		}
 	}
+	
+	sf::Vector2f posMouse = ventana.mapPixelToCoords(sf::Mouse::getPosition(ventana));
 	
 	for (int i = 0; i < TOTAL_PESTANAS; i++) {
 		botonesMenu[i].actualizar(posMouse);
