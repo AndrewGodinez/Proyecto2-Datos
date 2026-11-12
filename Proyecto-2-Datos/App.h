@@ -23,6 +23,7 @@ enum PestanaSistema {
 };
 
 class PantallasCliente;
+class PantallasAdmin;
 
 class App {
 private:
@@ -39,6 +40,7 @@ private:
 	bool mostrarVistaArbol;
 	
 	PantallasCliente* pantallasCliente;
+	PantallasAdmin* pantallasAdmin;
 	
 	void inicializarMenuLateral();
 	void dibujarBarraSuperior();
@@ -60,8 +62,8 @@ public:
 	Aerolinea& getSistema();
 	sf::RenderWindow& getVentana();
 	
-	bool getMostrarVistaArbol() const;
-	void setMostrarVistaArbol(bool mostrar);
+	bool getMostrarVistaArbol() const { return mostrarVistaArbol; }
+	void setMostrarVistaArbol(bool mostrar) { mostrarVistaArbol = mostrar; }
 };
 
 #endif

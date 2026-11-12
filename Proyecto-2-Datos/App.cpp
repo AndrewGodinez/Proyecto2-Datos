@@ -1,6 +1,7 @@
 #include "App.h"
 #include "Dibujo.h"
 #include "PantallasCliente.h"
+#include "PantallasAdmin.h"
 #include <iostream>
 
 App::App(Aerolinea& aerolinea) 
@@ -14,6 +15,7 @@ App::App(Aerolinea& aerolinea)
 	pestanaActual = PESTANA_DIJKSTRA;
 	mostrarVistaArbol = false;
 	pantallasCliente = new PantallasCliente();
+	pantallasAdmin = new PantallasAdmin();
 	
 	inicializarMenuLateral();
 }
@@ -22,6 +24,10 @@ App::~App() {
 	if (pantallasCliente != nullptr) {
 		delete pantallasCliente;
 		pantallasCliente = nullptr;
+	}
+	if (pantallasAdmin != nullptr) {
+		delete pantallasAdmin;
+		pantallasAdmin = nullptr;
 	}
 }
 
@@ -102,6 +108,8 @@ void App::procesarEventos() {
 		
 		if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
 			pantallasCliente->procesarEvento(evento, *this);
+		} else if (pestanaActual >= PESTANA_FLOTA_ADMIN && pantallasAdmin != nullptr) {
+			pantallasAdmin->procesarEvento(evento, *this);
 		}
 	}
 	
@@ -116,6 +124,8 @@ void App::procesarEventos() {
 	
 	if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
 		pantallasCliente->actualizar(posMouse, *this);
+	} else if (pestanaActual >= PESTANA_FLOTA_ADMIN && pantallasAdmin != nullptr) {
+		pantallasAdmin->actualizar(posMouse, *this);
 	}
 }
 
@@ -169,6 +179,8 @@ void App::dibujar() {
 	
 	if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
 		pantallasCliente->dibujar(ventana, *this);
+	} else if (pestanaActual >= PESTANA_FLOTA_ADMIN && pantallasAdmin != nullptr) {
+		pantallasAdmin->dibujar(ventana, *this);
 	}
 	
 	ventana.display();
@@ -189,6 +201,3 @@ VistaArbol& App::getVistaArbol() { return vistaArbol; }
 Animacion& App::getAnimacion() { return animacion; }
 Aerolinea& App::getSistema() { return sistema; }
 sf::RenderWindow& App::getVentana() { return ventana; }
-
-bool App::getMostrarVistaArbol() const { return mostrarVistaArbol; }
-void App::setMostrarVistaArbol(bool mostrar) { mostrarVistaArbol = mostrar; }
