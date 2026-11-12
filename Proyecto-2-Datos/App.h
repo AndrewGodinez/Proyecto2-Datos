@@ -22,6 +22,8 @@ enum PestanaSistema {
 	TOTAL_PESTANAS
 };
 
+class PantallasCliente;
+
 class App {
 private:
 	sf::RenderWindow ventana;
@@ -36,12 +38,15 @@ private:
 	Boton btnGuardarDatos;
 	bool mostrarVistaArbol;
 	
+	PantallasCliente* pantallasCliente;
+	
 	void inicializarMenuLateral();
 	void dibujarBarraSuperior();
 	void dibujarMenuLateral();
 	
 public:
 	App(Aerolinea& aerolinea);
+	~App();
 	void ejecutar();
 	void procesarEventos();
 	void actualizar(float dt);
@@ -54,6 +59,9 @@ public:
 	Animacion& getAnimacion();
 	Aerolinea& getSistema();
 	sf::RenderWindow& getVentana();
+	
+	bool getMostrarVistaArbol() const;
+	void setMostrarVistaArbol(bool mostrar);
 };
 
 #endif

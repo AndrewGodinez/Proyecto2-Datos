@@ -1,5 +1,6 @@
 #include "App.h"
 #include "Dibujo.h"
+#include "PantallasCliente.h"
 #include <iostream>
 
 App::App(Aerolinea& aerolinea) 
@@ -12,8 +13,16 @@ App::App(Aerolinea& aerolinea)
 	Dibujo::inicializarFuente();
 	pestanaActual = PESTANA_DIJKSTRA;
 	mostrarVistaArbol = false;
+	pantallasCliente = new PantallasCliente();
 	
 	inicializarMenuLateral();
+}
+
+App::~App() {
+	if (pantallasCliente != nullptr) {
+		delete pantallasCliente;
+		pantallasCliente = nullptr;
+	}
 }
 
 void App::inicializarMenuLateral() {
@@ -49,8 +58,7 @@ void App::cambiarPestana(PestanaSistema nuevaPestana) {
 		botonesMenu[i].setActivo(i == pestanaActual);
 	}
 	
-	mostrarVistaArbol = (pestanaActual == PESTANA_ABB_CIUDADES || 
-						 pestanaActual == PESTANA_AVL_PASAJEROS);
+	mostrarVistaArbol = (pestanaActual == PESTANA_AVL_PASAJEROS);
 	
 	vistaMapa.limpiarRutas();
 	animacion.detener();
@@ -91,6 +99,10 @@ void App::procesarEventos() {
 		if (!mostrarVistaArbol) {
 			vistaMapa.procesarEvento(evento, sistema.getGrafo());
 		}
+		
+		if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
+			pantallasCliente->procesarEvento(evento, *this);
+		}
 	}
 	
 	for (int i = 0; i < TOTAL_PESTANAS; i++) {
@@ -100,6 +112,10 @@ void App::procesarEventos() {
 	
 	if (!mostrarVistaArbol) {
 		vistaMapa.actualizarHover(posMouse, sistema.getGrafo());
+	}
+	
+	if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
+		pantallasCliente->actualizar(posMouse, *this);
 	}
 }
 
@@ -151,13 +167,17 @@ void App::dibujar() {
 	Dibujo::dibujarPanel(ventana, 255.0f, 535.0f, 1015.0f, 180.0f, 
 						 sf::Color(18, 24, 38), Dibujo::COLOR_BORDE, 1.0f);
 	
+	if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
+		pantallasCliente->dibujar(ventana, *this);
+	}
+	
 	ventana.display();
 }
 
 void App::ejecutar() {
 	while (ventana.isOpen()) {
 		float dt = relojFrame.restart().asSeconds();
-		procesarEvents: procesarEventos();
+		procesarEventos();
 		actualizar(dt);
 		dibujar();
 	}
@@ -169,3 +189,6 @@ VistaArbol& App::getVistaArbol() { return vistaArbol; }
 Animacion& App::getAnimacion() { return animacion; }
 Aerolinea& App::getSistema() { return sistema; }
 sf::RenderWindow& App::getVentana() { return ventana; }
+
+bool App::getMostrarVistaArbol() const { return mostrarVistaArbol; }
+void App::setMostrarVistaArbol(bool mostrar) { mostrarVistaArbol = mostrar; }
