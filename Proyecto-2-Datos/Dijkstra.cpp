@@ -103,27 +103,5 @@ ResultadoRuta Dijkstra::calcularRuta(const Grafo& grafo, int origen, int destino
 }
 
 ResultadoRuta Dijkstra::calcularRutaEquipaje(const Grafo& grafo, int origen, int destino, int criterioEquipaje, const ResultadoRuta& rutaPasajero) {
-	ResultadoRuta rutaMaleta = calcularRuta(grafo, origen, destino, criterioEquipaje);
-	if (!rutaMaleta.existe) {
-		return rutaMaleta;
-	}
-	
-	bool esIgual = (rutaMaleta.cantidadNodos == rutaPasajero.cantidadNodos);
-	if (esIgual) {
-		for (int i = 0; i < rutaMaleta.cantidadNodos; i++) {
-			if (rutaMaleta.nodos[i] != rutaPasajero.nodos[i]) {
-				esIgual = false;
-				break;
-			}
-		}
-	}
-	
-	if (esIgual && rutaPasajero.cantidadNodos >= 2) {
-		ResultadoRuta alterna = calcularRuta(grafo, origen, destino, criterioEquipaje, rutaPasajero.nodos[0], rutaPasajero.nodos[1]);
-		if (alterna.existe) {
-			return alterna;
-		}
-	}
-	
-	return rutaMaleta;
+	return calcularRuta(grafo, origen, destino, criterioEquipaje);
 }

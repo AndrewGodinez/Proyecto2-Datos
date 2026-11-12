@@ -2,24 +2,24 @@ REPORTE TECNICO DE ESTRUCTURAS DE DATOS - AEROLINEA UNA
 =======================================================
 
 1. RESUMEN DE ENTIDADES CARGADAS
-   - Ciudades:    10
+   - Ciudades:    11
    - Aeronaves:   6
    - Tripulacion: 8
-   - Vuelos:      8
-   - Reservas:    6
+   - Vuelos:      20
+   - Reservas:    7
 
 2. OPTIMIZACION GLOBAL DE RED (MST)
-   [Prim - Menor Costo Total: $2470]
-   - Preorden:  SJO -> PTY -> BOG -> LIM -> GRU -> MIA -> JFK -> MAD -> CDG -> MEX
-   - Inorden:   GRU -> LIM -> BOG -> PTY -> CDG -> MAD -> JFK -> MIA -> SJO -> MEX
-   - Postorden: GRU -> LIM -> BOG -> CDG -> MAD -> JFK -> MIA -> PTY -> MEX -> SJO
-   - Anchura:   SJO -> PTY -> MEX -> BOG -> MIA -> LIM -> JFK -> GRU -> MAD -> CDG
+   [Prim - Menor Costo Total: $2530]
+   - Preorden:  SJO -> PTY -> BOG -> JAC -> LIM -> GRU -> MIA -> JFK -> MAD -> CDG -> MEX
+   - Inorden:   JAC -> BOG -> GRU -> LIM -> PTY -> CDG -> MAD -> JFK -> MIA -> SJO -> MEX
+   - Postorden: JAC -> GRU -> LIM -> BOG -> CDG -> MAD -> JFK -> MIA -> PTY -> MEX -> SJO
+   - Anchura:   SJO -> PTY -> MEX -> BOG -> MIA -> JAC -> LIM -> JFK -> GRU -> MAD -> CDG
 
-   [Kruskal - Menor Duracion Total: 27.8 hrs]
-   - Preorden:  SJO -> PTY -> BOG -> LIM -> GRU -> MIA -> JFK -> MAD -> CDG -> MEX
-   - Inorden:   GRU -> LIM -> BOG -> PTY -> SJO -> CDG -> MAD -> JFK -> MIA -> MEX
-   - Postorden: GRU -> LIM -> BOG -> PTY -> CDG -> MAD -> JFK -> MIA -> MEX -> SJO
-   - Anchura:   SJO -> PTY -> MIA -> MEX -> BOG -> JFK -> LIM -> MAD -> GRU -> CDG
+   [Kruskal - Menor Duracion Total: 72.8 hrs]
+   - Preorden:  SJO -> PTY -> BOG -> LIM -> GRU -> JAC -> MIA -> JFK -> MAD -> CDG -> MEX
+   - Inorden:   GRU -> LIM -> BOG -> JAC -> PTY -> SJO -> CDG -> MAD -> JFK -> MIA -> MEX
+   - Postorden: GRU -> LIM -> JAC -> BOG -> PTY -> CDG -> MAD -> JFK -> MIA -> MEX -> SJO
+   - Anchura:   SJO -> PTY -> MIA -> MEX -> BOG -> JFK -> LIM -> JAC -> MAD -> GRU -> CDG
 
 3. ARBOL BALANCEADO AVL DE PASAJEROS
    - Preorden:  207910442:Andrew Jimenez -> 118450231:Sem Mora -> 115220890:Maria Fernanda Solis -> 119020554:Camila Brenes -> 304980115:Daniela Alvarado -> 402310778:Jorge Hernandez
@@ -30,10 +30,10 @@ REPORTE TECNICO DE ESTRUCTURAS DE DATOS - AEROLINEA UNA
 4. LISTADO DE RESERVAS CON RUTA DIFERENCIADA DE EQUIPAJE
    - Reserva #101 | Sem Mora (Ced: 118450231)
      Ruta Pasajero: SJO -> MIA -> MAD
-     Ruta Equipaje: SJO -> PTY -> BOG -> MAD
+     Ruta Equipaje: SJO -> MIA -> MAD
    - Reserva #102 | Andrew Jimenez (Ced: 207910442)
      Ruta Pasajero: SJO -> MIA -> JFK
-     Ruta Equipaje: SJO -> MEX -> JFK
+     Ruta Equipaje: SJO -> MIA -> JFK
    - Reserva #103 | Maria Fernanda Solis (Ced: 115220890)
      Ruta Pasajero: PTY -> MIA -> JFK -> CDG
      Ruta Equipaje: PTY -> BOG -> MAD -> CDG
@@ -46,3 +46,6 @@ REPORTE TECNICO DE ESTRUCTURAS DE DATOS - AEROLINEA UNA
    - Reserva #106 | Camila Brenes (Ced: 119020554)
      Ruta Pasajero: SJO -> PTY -> BOG -> LIM -> GRU
      Ruta Equipaje: SJO -> PTY -> BOG -> LIM -> GRU
+   - Reserva #107 | Sem Mora (Ced: 118450231)
+     Ruta Pasajero: MIA -> JFK -> CDG
+     Ruta Equipaje: MIA -> MAD -> CDG

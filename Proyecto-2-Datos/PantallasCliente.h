@@ -29,7 +29,9 @@ private:
 	Boton btnCalcularBF;
 	Boton btnBFPrev;
 	Boton btnBFNext;
+	Boton btnAnimarBF;
 	bool bfPorTiempo;
+	int bfOrigen;
 	int bfPaginaActual;
 	int bfTotalDestinos;
 	ResultadoRuta bfResultados[MAX_CIUDADES];
@@ -49,6 +51,10 @@ private:
 	
 	CajaTexto txtCedula;
 	CajaTexto txtNombre;
+	Boton btnReservaCosto;
+	Boton btnReservaTiempo;
+	Boton btnVerViaje;
+	bool reservaPorTiempo;
 	Boton btnConfirmarReserva;
 	Boton btnLimpiarReserva;
 	string textoResultadoReserva;

@@ -92,6 +92,19 @@ void PrimKruskal::llenarRecorridos(const Grafo& grafo, int raiz, ResultadoMST& r
 	int cantHijos[MAX_CIUDADES];
 	construirHijos(cantidadCiudades, resultado.aristas, resultado.cantidadAristas, raiz, hijos, cantHijos);
 	
+	resultado.raiz = raiz;
+	for (int i = 0; i < cantidadCiudades; i++) {
+		resultado.visual[i].etiqueta = grafo.getCiudad(i).codigo;
+		resultado.visual[i].factorEquilibrio = 0;
+		resultado.visual[i].izq = (cantHijos[i] > 0) ? hijos[i][0] : -1;
+		resultado.visual[i].der = -1;
+	}
+	for (int i = 0; i < cantidadCiudades; i++) {
+		for (int k = 0; k + 1 < cantHijos[i]; k++) {
+			resultado.visual[hijos[i][k]].der = hijos[i][k + 1];
+		}
+	}
+	
 	resultado.preorden = "";
 	resultado.inorden = "";
 	resultado.postorden = "";
@@ -109,6 +122,7 @@ ResultadoMST PrimKruskal::calcularPrim(const Grafo& grafo, int ciudadInicial) {
 	resultado.cantidadAristas = 0;
 	resultado.costoTotal = 0.0;
 	resultado.duracionTotal = 0.0;
+	resultado.raiz = -1;
 	
 	int cantidadCiudades = grafo.getCantidadCiudades();
 	if (cantidadCiudades <= 0) {
@@ -182,6 +196,7 @@ ResultadoMST PrimKruskal::calcularKruskal(const Grafo& grafo, int ciudadInicial)
 	resultado.cantidadAristas = 0;
 	resultado.costoTotal = 0.0;
 	resultado.duracionTotal = 0.0;
+	resultado.raiz = -1;
 	
 	int cantidadCiudades = grafo.getCantidadCiudades();
 	if (cantidadCiudades <= 0) {

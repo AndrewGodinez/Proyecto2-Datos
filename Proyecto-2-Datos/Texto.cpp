@@ -1,5 +1,6 @@
 #include "Texto.h"
 #include <cstdlib>
+#include <cctype>
 
 string Texto::limpiarEspacios(string texto) {
 	int inicio = 0;
@@ -54,4 +55,38 @@ double Texto::aDecimal(string texto) {
 		return 0.0;
 	}
 	return atof(limpio.c_str());
+}
+
+string Texto::minusculas(string texto) {
+	for (size_t i = 0; i < texto.length(); i++) {
+		texto[i] = tolower(texto[i]);
+	}
+	return texto;
+}
+
+string Texto::mayusculas(string texto) {
+	for (size_t i = 0; i < texto.length(); i++) {
+		texto[i] = toupper(texto[i]);
+	}
+	return texto;
+}
+
+string Texto::formatoHoras(double horas) {
+	int decimas = (int)(horas * 10.0 + 0.5);
+	return to_string(decimas / 10) + "." + to_string(decimas % 10) + " h";
+}
+
+bool Texto::listaContiene(string lista, string codigo) {
+	string actual = "";
+	for (size_t i = 0; i <= lista.length(); i++) {
+		if (i == lista.length() || lista[i] == ',') {
+			if (limpiarEspacios(actual) == codigo) {
+				return true;
+			}
+			actual = "";
+		} else {
+			actual += lista[i];
+		}
+	}
+	return false;
 }

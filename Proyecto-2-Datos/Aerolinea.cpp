@@ -1,4 +1,5 @@
 #include "Aerolinea.h"
+#include "Texto.h"
 
 Aerolinea::Aerolinea() {
 	cantidadAeronaves = 0;
@@ -33,10 +34,52 @@ int Aerolinea::buscarAeronave(string codigo) const {
 int Aerolinea::buscarVueloPorTramo(string origen, string destino) const {
 	for (int i = 0; i < cantidadVuelos; i++) {
 		if (vuelos[i].origen == origen && vuelos[i].destino == destino) {
+			int indiceAvion = buscarAeronave(vuelos[i].codigoAeronave);
+			if (indiceAvion == -1 || vuelos[i].asientosOcupados < aeronaves[indiceAvion].capacidad) {
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
+int Aerolinea::buscarVuelo(string codigo) const {
+	for (int i = 0; i < cantidadVuelos; i++) {
+		if (vuelos[i].codigo == codigo) {
 			return i;
 		}
 	}
 	return -1;
+}
+
+string Aerolinea::vuelosDeRuta(const ResultadoRuta& ruta) const {
+	string lista = "";
+	for (int i = 0; i < ruta.cantidadNodos - 1; i++) {
+		string origen = grafo.getCiudad(ruta.nodos[i]).codigo;
+		string destino = grafo.getCiudad(ruta.nodos[i + 1]).codigo;
+		int indiceVuelo = buscarVueloPorTramo(origen, destino);
+		if (indiceVuelo == -1) {
+			return "";
+		}
+		if (!lista.empty()) {
+			lista += ",";
+		}
+		lista += vuelos[indiceVuelo].codigo;
+	}
+	return lista;
+}
+
+string Aerolinea::pasajerosDeVuelo(string codigoVuelo) const {
+	string texto = "";
+	for (int i = 0; i < cantidadReservas; i++) {
+		if (reservas[i].activa && Texto::listaContiene(reservas[i].vuelos, codigoVuelo)) {
+			if (!texto.empty()) {
+				texto += ", ";
+			}
+			texto += reservas[i].nombrePasajero + " (" + to_string(reservas[i].cedulaPasajero) + ")";
+		}
+	}
+	return texto;
 }
 
 bool Aerolinea::cargarDatos() {
@@ -51,8 +94,7 @@ bool Aerolinea::cargarDatos() {
 	
 	for (int i = 0; i < cantidadReservas; i++) {
 		if (reservas[i].activa) {
-			string detalle = reservas[i].origen + "->" + reservas[i].destino;
-			avlPasajeros.insertar(reservas[i].cedulaPasajero, reservas[i].nombrePasajero, detalle);
+			avlPasajeros.agregarReserva(reservas[i].cedulaPasajero, reservas[i].nombrePasajero, reservas[i].idReserva, reservas[i].vuelos);
 		}
 	}
 	return true;
@@ -75,7 +117,7 @@ bool Aerolinea::registrarCiudad(string codigo, string nombre, float posX, float 
 bool Aerolinea::registrarRuta(string codigoOrigen, string codigoDestino, double costo, double duracion) {
 	int origen = grafo.buscarIndicePorCodigo(codigoOrigen);
 	int destino = grafo.buscarIndicePorCodigo(codigoDestino);
-	if (origen == -1 || destino == -1) {
+	if (origen == -1 || destino == -1 || costo <= 0.0 || duracion <= 0.0) {
 		return false;
 	}
 	return grafo.agregarRuta(origen, destino, costo, duracion);
@@ -90,11 +132,11 @@ bool Aerolinea::eliminarRuta(string codigoOrigen, string codigoDestino) {
 	return grafo.eliminarRuta(origen, destino);
 }
 
-bool Aerolinea::registrarAeronave(string codigo, string modelo, int capacidad, string estado) {
+bool Aerolinea::registrarAeronave(string codigo, string placa, string marca, string modelo, int capacidad, string estado) {
 	if (cantidadAeronaves >= MAX_AERONAVES || buscarAeronave(codigo) != -1 || capacidad <= 0) {
 		return false;
 	}
-	aeronaves[cantidadAeronaves] = { codigo, modelo, capacidad, estado };
+	aeronaves[cantidadAeronaves] = { codigo, modelo, capacidad, estado, placa, marca };
 	cantidadAeronaves++;
 	return true;
 }
@@ -113,11 +155,14 @@ bool Aerolinea::registrarTripulante(string id, string nombre, string rol) {
 	return true;
 }
 
-bool Aerolinea::asignarTripulanteAVuelo(string idTripulante, string codigoVuelo) {
+bool Aerolinea::asignarTripulanteAAeronave(string idTripulante, string codigoAeronave) {
+	if (buscarAeronave(codigoAeronave) == -1) {
+		return false;
+	}
 	for (int i = 0; i < cantidadTripulantes; i++) {
-		if (tripulantes[i].id == idTripulante && tripulantes[i].disponible) {
+		if (tripulantes[i].id == idTripulante) {
 			tripulantes[i].disponible = false;
-			tripulantes[i].vueloAsignado = codigoVuelo;
+			tripulantes[i].aeronaveAsignada = codigoAeronave;
 			return true;
 		}
 	}
@@ -125,7 +170,7 @@ bool Aerolinea::asignarTripulanteAVuelo(string idTripulante, string codigoVuelo)
 }
 
 bool Aerolinea::programarVuelo(string codigo, string origen, string destino, string fechaHora, double costo, double duracion, string codigoAeronave) {
-	if (cantidadVuelos >= MAX_VUELOS) {
+	if (cantidadVuelos >= MAX_VUELOS || buscarVuelo(codigo) != -1) {
 		return false;
 	}
 	int indiceAvion = buscarAeronave(codigoAeronave);
@@ -150,22 +195,20 @@ bool Aerolinea::crearReserva(int cedula, string nombre, string codigoOrigen, str
 		return false;
 	}
 	
-	int indiceVuelo = buscarVueloPorTramo(codigoOrigen, codigoDestino);
-	if (indiceVuelo != -1) {
-		int indiceAvion = buscarAeronave(vuelos[indiceVuelo].codigoAeronave);
-		if (indiceAvion != -1 && vuelos[indiceVuelo].asientosOcupados >= aeronaves[indiceAvion].capacidad) {
-			return false;
-		}
-	}
-	
 	ResultadoRuta rutaPasajero = Dijkstra::calcularRuta(grafo, origen, destino, criterioPasajero);
 	if (!rutaPasajero.existe) {
 		return false;
 	}
+	string listaVuelos = vuelosDeRuta(rutaPasajero);
+	if (listaVuelos.empty()) {
+		return false;
+	}
 	ResultadoRuta rutaMaleta = Dijkstra::calcularRutaEquipaje(grafo, origen, destino, criterioEquipaje, rutaPasajero);
 	
-	if (indiceVuelo != -1) {
-		vuelos[indiceVuelo].asientosOcupados++;
+	for (int i = 0; i < cantidadVuelos; i++) {
+		if (Texto::listaContiene(listaVuelos, vuelos[i].codigo)) {
+			vuelos[i].asientosOcupados++;
+		}
 	}
 	
 	Reserva nueva;
@@ -179,10 +222,11 @@ bool Aerolinea::crearReserva(int cedula, string nombre, string codigoOrigen, str
 	nueva.costoTotal = rutaPasajero.costoTotal;
 	nueva.duracionTotal = rutaPasajero.duracionTotal;
 	nueva.activa = true;
+	nueva.vuelos = listaVuelos;
 	
 	reservas[cantidadReservas] = nueva;
 	cantidadReservas++;
-	avlPasajeros.insertar(cedula, nombre, codigoOrigen + "->" + codigoDestino);
+	avlPasajeros.agregarReserva(cedula, nombre, nueva.idReserva, listaVuelos);
 	reservaCreada = nueva;
 	return true;
 }
@@ -191,7 +235,12 @@ bool Aerolinea::cancelarReserva(int idReserva) {
 	for (int i = 0; i < cantidadReservas; i++) {
 		if (reservas[i].idReserva == idReserva && reservas[i].activa) {
 			reservas[i].activa = false;
-			avlPasajeros.eliminar(reservas[i].cedulaPasajero);
+			for (int j = 0; j < cantidadVuelos; j++) {
+				if (Texto::listaContiene(reservas[i].vuelos, vuelos[j].codigo) && vuelos[j].asientosOcupados > 0) {
+					vuelos[j].asientosOcupados--;
+				}
+			}
+			avlPasajeros.quitarReserva(reservas[i].cedulaPasajero, idReserva);
 			return true;
 		}
 	}
@@ -204,12 +253,12 @@ ResultadoRuta Aerolinea::buscarRutaDijkstra(string codigoOrigen, string codigoDe
 	return Dijkstra::calcularRuta(grafo, origen, destino, criterio);
 }
 
-ResultadoMST Aerolinea::obtenerRedPrim() const {
-	return PrimKruskal::calcularPrim(grafo, 0);
+ResultadoMST Aerolinea::obtenerRedPrim(int ciudadInicial) const {
+	return PrimKruskal::calcularPrim(grafo, ciudadInicial);
 }
 
-ResultadoMST Aerolinea::obtenerRedKruskal() const {
-	return PrimKruskal::calcularKruskal(grafo, 0);
+ResultadoMST Aerolinea::obtenerRedKruskal(int ciudadInicial) const {
+	return PrimKruskal::calcularKruskal(grafo, ciudadInicial);
 }
 
 const Grafo& Aerolinea::getGrafo() const { 

@@ -79,10 +79,6 @@ static void ejecutarBellmanFord(const Grafo& grafo, int origen, int criterio, do
 			}
 			
 			double peso = (criterio == CRITERIO_COSTO) ? aristas[e].costo : aristas[e].duracion;
-			if (peso < 0.0) {
-				continue;
-			}
-			
 			if (dist[u] + peso < dist[v]) {
 				dist[v] = dist[u] + peso;
 				padre[v] = u;

@@ -19,7 +19,13 @@ private:
 	ResultadoMST redMST;
 	bool mostrarRutasAlgoritmo;
 	bool mostrarMST;
+	ResultadoRuta caminosBF[MAX_CIUDADES];
+	int totalCaminosBF;
+	bool mostrarCaminosBF;
+	bool hayPuntoNuevo;
+	sf::Vector2f puntoNuevo;
 	
+	void dibujarCaminosBF(sf::RenderWindow& ventana, const Grafo& grafo) const;
 	void dibujarRutasBase(sf::RenderWindow& ventana, const Grafo& grafo) const;
 	void dibujarRutasResaltadas(sf::RenderWindow& ventana, const Grafo& grafo) const;
 	void dibujarRedMST(sf::RenderWindow& ventana, const Grafo& grafo) const;
@@ -36,6 +42,8 @@ public:
 	
 	void setRutas(const ResultadoRuta& pasajero, const ResultadoRuta& equipaje);
 	void setMST(const ResultadoMST& mst);
+	void setCaminosBF(const ResultadoRuta rutas[], int total);
+	bool getPuntoNuevo(const Grafo& grafo, float& x, float& y) const;
 	void limpiarRutas();
 	
 	int getOrigen() const;

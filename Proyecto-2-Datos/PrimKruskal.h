@@ -14,6 +14,8 @@ struct ResultadoMST {
 	string inorden;
 	string postorden;
 	string anchura;
+	NodoVisual visual[MAX_CIUDADES];
+	int raiz;
 };
 
 class PrimKruskal {

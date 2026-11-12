@@ -9,8 +9,15 @@ struct ElementoAVL {
 	string detalle;
 };
 
+struct NodoReserva {
+	int idReserva;
+	string vuelos;
+	NodoReserva* siguiente;
+};
+
 struct NodoAVL {
 	ElementoAVL dato;
+	NodoReserva* reservas;
 	int altura;
 	NodoAVL* izq;
 	NodoAVL* der;
@@ -33,6 +40,7 @@ private:
 	NodoAVL* eliminarNodo(NodoAVL* nodo, int id, bool& eliminado);
 	NodoAVL* buscarNodo(NodoAVL* nodo, int id) const;
 	void liberarSubarbol(NodoAVL* nodo);
+	void liberarReservas(NodoReserva* lista);
 	void recPreorden(NodoAVL* nodo, string& texto) const;
 	void recInorden(NodoAVL* nodo, string& texto) const;
 	void recPostorden(NodoAVL* nodo, string& texto) const;
@@ -45,6 +53,10 @@ public:
 	bool insertar(int id, string nombre, string detalle);
 	bool eliminar(int id);
 	bool buscar(int id, ElementoAVL& resultado) const;
+	bool agregarReserva(int id, string nombre, int idReserva, string vuelos);
+	bool quitarReserva(int id, int idReserva);
+	bool estaEnVuelo(int id, string codigoVuelo) const;
+	string reservasDe(int id) const;
 	int tamanio() const;
 	void limpiar();
 	

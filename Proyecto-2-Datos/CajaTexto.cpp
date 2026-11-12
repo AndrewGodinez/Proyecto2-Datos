@@ -1,5 +1,7 @@
 #include "CajaTexto.h"
 
+CajaTexto* CajaTexto::cajaActiva = nullptr;
+
 CajaTexto::CajaTexto() {
 	limites = sf::FloatRect(0, 0, 150, 32);
 	texto = "";
@@ -21,6 +23,11 @@ void CajaTexto::procesarEvento(const sf::Event& evento) {
 	if (evento.type == sf::Event::MouseButtonPressed && evento.mouseButton.button == sf::Mouse::Left) {
 		sf::Vector2f punto(static_cast<float>(evento.mouseButton.x), static_cast<float>(evento.mouseButton.y));
 		tieneFoco = limites.contains(punto);
+		if (tieneFoco) {
+			cajaActiva = this;
+		} else if (cajaActiva == this) {
+			cajaActiva = nullptr;
+		}
 	}
 	
 	if (tieneFoco && evento.type == sf::Event::TextEntered) {
@@ -32,6 +39,7 @@ void CajaTexto::procesarEvento(const sf::Event& evento) {
 			}
 		} else if (codigo == 13 || codigo == 27) { 
 			tieneFoco = false;
+			cajaActiva = nullptr;
 		} else if (codigo >= 32 && codigo <= 126) { 
 			if (static_cast<int>(texto.size()) < maxCaracteres) {
 				texto += static_cast<char>(codigo);
@@ -90,4 +98,15 @@ bool CajaTexto::getTieneFoco() const {
 
 void CajaTexto::setFoco(bool foco) {
 	tieneFoco = foco;
+}
+
+bool CajaTexto::hayCajaActiva() {
+	return cajaActiva != nullptr;
+}
+
+void CajaTexto::quitarFocoActivo() {
+	if (cajaActiva != nullptr) {
+		cajaActiva->tieneFoco = false;
+		cajaActiva = nullptr;
+	}
 }

@@ -32,6 +32,7 @@ private:
 	bool animandoArbol;
 	int totalNodosArbol;
 	int nodoActivoArbol;
+	int ordenArbol[MAX_CIUDADES * 2];
 	float tiempoPasoArbol;
 	float acumuladorTiempoArbol;
 	
@@ -45,7 +46,7 @@ public:
 	void detener();
 	void alternarPausa();
 	
-	void iniciarRecorridoArbol(int cantidadNodos, float intervaloSegundos = 0.5f);
+	void iniciarRecorridoArbol(const int orden[], int cantidadNodos, float intervaloSegundos = 0.5f);
 	void detenerRecorridoArbol();
 	int getNodoActivoArbol() const;
 	bool getAnimandoArbol() const;

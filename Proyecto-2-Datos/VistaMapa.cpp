@@ -1,5 +1,6 @@
 #include "VistaMapa.h"
 #include "Dibujo.h"
+#include "Texto.h"
 #include <cmath>
 
 VistaMapa::VistaMapa() {
@@ -9,6 +10,7 @@ VistaMapa::VistaMapa() {
 	ciudadHover = -1;
 	mostrarRutasAlgoritmo = false;
 	mostrarMST = false;
+	hayPuntoNuevo = false;
 	limpiarRutas();
 }
 
@@ -19,6 +21,7 @@ VistaMapa::VistaMapa(float x, float y, float ancho, float alto) {
 	this->ciudadHover = -1;
 	this->mostrarRutasAlgoritmo = false;
 	this->mostrarMST = false;
+	this->hayPuntoNuevo = false;
 	limpiarRutas();
 }
 
@@ -31,6 +34,8 @@ void VistaMapa::limpiarRutas() {
 	redMST.cantidadAristas = 0;
 	mostrarRutasAlgoritmo = false;
 	mostrarMST = false;
+	totalCaminosBF = 0;
+	mostrarCaminosBF = false;
 }
 
 void VistaMapa::setRutas(const ResultadoRuta& pasajero, const ResultadoRuta& equipaje) {
@@ -44,6 +49,39 @@ void VistaMapa::setMST(const ResultadoMST& mst) {
 	limpiarRutas();
 	this->redMST = mst;
 	this->mostrarMST = true;
+}
+
+void VistaMapa::setCaminosBF(const ResultadoRuta rutas[], int total) {
+	limpiarRutas();
+	for (int i = 0; i < total; i++) {
+		caminosBF[i] = rutas[i];
+	}
+	totalCaminosBF = total;
+	mostrarCaminosBF = true;
+}
+
+bool VistaMapa::getPuntoNuevo(const Grafo& grafo, float& x, float& y) const {
+	if (!hayPuntoNuevo) {
+		return false;
+	}
+	int total = grafo.getCantidadCiudades();
+	float minX = 999999.0f, maxX = -999999.0f;
+	float minY = 999999.0f, maxY = -999999.0f;
+	for (int i = 0; i < total; i++) {
+		Ciudad c = grafo.getCiudad(i);
+		if (c.posX < minX) minX = c.posX;
+		if (c.posX > maxX) maxX = c.posX;
+		if (c.posY < minY) minY = c.posY;
+		if (c.posY > maxY) maxY = c.posY;
+	}
+	if (total < 2) {
+		x = puntoNuevo.x;
+		y = puntoNuevo.y;
+		return true;
+	}
+	x = minX + (puntoNuevo.x - 320.0f) / 885.0f * (maxX - minX);
+	y = minY + (puntoNuevo.y - 105.0f) / 375.0f * (maxY - minY);
+	return true;
 }
 
 void VistaMapa::actualizarHover(sf::Vector2f posMouse, const Grafo& grafo) {
@@ -83,9 +121,12 @@ int VistaMapa::procesarEvento(const sf::Event& evento, const Grafo& grafo) {
 				} else if (destinoSeleccionado == -1 && i != origenSeleccionado) {
 					destinoSeleccionado = i;
 				}
+				hayPuntoNuevo = false;
 				return i;
 			}
 		}
+		hayPuntoNuevo = true;
+		puntoNuevo = click;
 	}
 	return -1;
 }
@@ -100,8 +141,32 @@ void VistaMapa::dibujarRutasBase(sf::RenderWindow& ventana, const Grafo& grafo) 
 		Ciudad destino = grafo.getCiudad(rutas[i].destino);
 		sf::Vector2f posO = Dibujo::proyectarCiudad(origen, grafo);
 		sf::Vector2f posD = Dibujo::proyectarCiudad(destino, grafo);
-		Dibujo::dibujarFlechaDirigida(ventana, posO.x, posO.y, posD.x, posD.y, 
-									  colorRutaInactiva, 1.2f, "", 16.0f);
+		float dx = posD.x - posO.x;
+		float dy = posD.y - posO.y;
+		float largo = std::sqrt(dx * dx + dy * dy);
+		if (largo < 1.0f) continue;
+		float desplazaX = -dy / largo * 4.0f;
+		float desplazaY = dx / largo * 4.0f;
+		bool resaltada = (rutas[i].origen == ciudadHover);
+		string etiqueta = "";
+		sf::Color color = colorRutaInactiva;
+		if (resaltada) {
+			etiqueta = "$" + to_string((int)rutas[i].costo) + " | " + Texto::formatoHoras(rutas[i].duracion);
+			color = sf::Color(250, 204, 21);
+		}
+		Dibujo::dibujarFlechaDirigida(ventana, posO.x + desplazaX, posO.y + desplazaY, posD.x + desplazaX, posD.y + desplazaY, 
+									  color, resaltada ? 2.0f : 1.2f, etiqueta, 16.0f);
+	}
+}
+
+void VistaMapa::dibujarCaminosBF(sf::RenderWindow& ventana, const Grafo& grafo) const {
+	if (!mostrarCaminosBF) return;
+	for (int i = 0; i < totalCaminosBF; i++) {
+		for (int j = 0; caminosBF[i].existe && j < caminosBF[i].cantidadNodos - 1; j++) {
+			sf::Vector2f posA = Dibujo::proyectarCiudad(grafo.getCiudad(caminosBF[i].nodos[j]), grafo);
+			sf::Vector2f posB = Dibujo::proyectarCiudad(grafo.getCiudad(caminosBF[i].nodos[j + 1]), grafo);
+			Dibujo::dibujarFlechaDirigida(ventana, posA.x, posA.y, posB.x, posB.y, Dibujo::COLOR_VERDE_EXITO, 2.5f, "", 16.0f);
+		}
 	}
 }
 
@@ -167,15 +232,20 @@ void VistaMapa::dibujar(sf::RenderWindow& ventana, const Grafo& grafo, const Ani
 	
 	dibujarRutasBase(ventana, grafo);
 	dibujarRedMST(ventana, grafo);
+	dibujarCaminosBF(ventana, grafo);
 	dibujarRutasResaltadas(ventana, grafo);
 	
 	animacion.dibujar(ventana);
 	
 	dibujarCiudades(ventana, grafo);
+	
+	if (hayPuntoNuevo) {
+		Dibujo::dibujarTexto(ventana, "+", puntoNuevo.x, puntoNuevo.y, 22, Dibujo::COLOR_VERDE_EXITO, true);
+	}
 }
 
 int VistaMapa::getOrigen() const { return origenSeleccionado; }
 int VistaMapa::getDestino() const { return destinoSeleccionado; }
 void VistaMapa::setOrigen(int id) { origenSeleccionado = id; }
 void VistaMapa::setDestino(int id) { destinoSeleccionado = id; }
-void VistaMapa::limpiarSeleccion() { origenSeleccionado = -1; destinoSeleccionado = -1; }
+void VistaMapa::limpiarSeleccion() { origenSeleccionado = -1; destinoSeleccionado = -1; hayPuntoNuevo = false; }

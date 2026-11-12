@@ -1,5 +1,6 @@
 #include "ArbolAVL.h"
 #include "Cola.h"
+#include "Texto.h"
 
 static const int MAX_NODOS_AVL = 256;
 
@@ -84,7 +85,7 @@ NodoAVL* ArbolAVL::balancear(NodoAVL* nodo) {
 NodoAVL* ArbolAVL::insertarNodo(NodoAVL* nodo, const ElementoAVL& nuevoDato, bool& insertado) {
 	if (nodo == nullptr) {
 		insertado = true;
-		NodoAVL* nuevo = new NodoAVL{ nuevoDato, 1, nullptr, nullptr };
+		NodoAVL* nuevo = new NodoAVL{ nuevoDato, nullptr, 1, nullptr, nullptr };
 		return nuevo;
 	}
 	if (nuevoDato.id < nodo->dato.id) {
@@ -118,11 +119,15 @@ NodoAVL* ArbolAVL::eliminarNodo(NodoAVL* nodo, int id, bool& eliminado) {
 		eliminado = true;
 		if (nodo->izq == nullptr || nodo->der == nullptr) {
 			NodoAVL* hijoUnico = (nodo->izq != nullptr) ? nodo->izq : nodo->der;
+			liberarReservas(nodo->reservas);
 			delete nodo;
 			return hijoUnico;
 		}
 		NodoAVL* sucesor = obtenerMinimo(nodo->der);
 		nodo->dato = sucesor->dato;
+		liberarReservas(nodo->reservas);
+		nodo->reservas = sucesor->reservas;
+		sucesor->reservas = nullptr;
 		bool borradoAux = false;
 		nodo->der = eliminarNodo(nodo->der, sucesor->dato.id, borradoAux);
 	}
@@ -145,7 +150,16 @@ void ArbolAVL::liberarSubarbol(NodoAVL* nodo) {
 	}
 	liberarSubarbol(nodo->izq);
 	liberarSubarbol(nodo->der);
+	liberarReservas(nodo->reservas);
 	delete nodo;
+}
+
+void ArbolAVL::liberarReservas(NodoReserva* lista) {
+	while (lista != nullptr) {
+		NodoReserva* borrar = lista;
+		lista = lista->siguiente;
+		delete borrar;
+	}
 }
 
 bool ArbolAVL::insertar(int id, string nombre, string detalle) {
@@ -174,6 +188,79 @@ bool ArbolAVL::buscar(int id, ElementoAVL& resultado) const {
 	}
 	resultado = encontrado->dato;
 	return true;
+}
+
+bool ArbolAVL::agregarReserva(int id, string nombre, int idReserva, string vuelos) {
+	insertar(id, nombre, "");
+	NodoAVL* nodo = buscarNodo(raiz, id);
+	if (nodo == nullptr) {
+		return false;
+	}
+	NodoReserva* nueva = new NodoReserva{ idReserva, vuelos, nullptr };
+	if (nodo->reservas == nullptr) {
+		nodo->reservas = nueva;
+		return true;
+	}
+	NodoReserva* actual = nodo->reservas;
+	while (actual->siguiente != nullptr) {
+		actual = actual->siguiente;
+	}
+	actual->siguiente = nueva;
+	return true;
+}
+
+bool ArbolAVL::quitarReserva(int id, int idReserva) {
+	NodoAVL* nodo = buscarNodo(raiz, id);
+	if (nodo == nullptr) {
+		return false;
+	}
+	NodoReserva* anterior = nullptr;
+	NodoReserva* actual = nodo->reservas;
+	while (actual != nullptr && actual->idReserva != idReserva) {
+		anterior = actual;
+		actual = actual->siguiente;
+	}
+	if (actual == nullptr) {
+		return false;
+	}
+	if (anterior == nullptr) {
+		nodo->reservas = actual->siguiente;
+	} else {
+		anterior->siguiente = actual->siguiente;
+	}
+	delete actual;
+	if (nodo->reservas == nullptr) {
+		eliminar(id);
+	}
+	return true;
+}
+
+bool ArbolAVL::estaEnVuelo(int id, string codigoVuelo) const {
+	NodoAVL* nodo = buscarNodo(raiz, id);
+	if (nodo == nullptr) {
+		return false;
+	}
+	for (NodoReserva* actual = nodo->reservas; actual != nullptr; actual = actual->siguiente) {
+		if (Texto::listaContiene(actual->vuelos, codigoVuelo)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+string ArbolAVL::reservasDe(int id) const {
+	string texto = "";
+	NodoAVL* nodo = buscarNodo(raiz, id);
+	if (nodo == nullptr) {
+		return texto;
+	}
+	for (NodoReserva* actual = nodo->reservas; actual != nullptr; actual = actual->siguiente) {
+		if (!texto.empty()) {
+			texto += "  ";
+		}
+		texto += "#" + to_string(actual->idReserva) + " (" + actual->vuelos + ")";
+	}
+	return texto;
 }
 
 int ArbolAVL::tamanio() const {

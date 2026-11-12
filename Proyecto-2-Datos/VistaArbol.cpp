@@ -1,5 +1,6 @@
 #include "VistaArbol.h"
 #include "Dibujo.h"
+#include "Cola.h"
 #include <cmath>
 
 VistaArbol::VistaArbol() {
@@ -8,6 +9,7 @@ VistaArbol::VistaArbol() {
 	raiz = -1;
 	titulo = "";
 	esAVL = false;
+	esGeneral = false;
 	limpiar();
 }
 
@@ -17,6 +19,7 @@ VistaArbol::VistaArbol(float x, float y, float ancho, float alto) {
 	this->raiz = -1;
 	this->titulo = "";
 	this->esAVL = false;
+	this->esGeneral = false;
 	limpiar();
 }
 
@@ -25,6 +28,7 @@ void VistaArbol::limpiar() {
 	raiz = -1;
 	titulo = "";
 	esAVL = false;
+	esGeneral = false;
 	for (int i = 0; i < MAX_CIUDADES * 2; i++) {
 		posiciones[i].x = 0.0f;
 		posiciones[i].y = 0.0f;
@@ -32,27 +36,110 @@ void VistaArbol::limpiar() {
 	}
 }
 
-void VistaArbol::calcularPosiciones(int idx, float xMin, float xMax, float y, float separacionY) {
+int VistaArbol::contarNiveles(int idx) const {
+	if (idx < 0 || idx >= totalNodos) return 0;
+	int mayor = 0;
+	if (esGeneral) {
+		for (int hijo = nodos[idx].izq; hijo != -1; hijo = nodos[hijo].der) {
+			int niveles = contarNiveles(hijo);
+			if (niveles > mayor) mayor = niveles;
+		}
+		return mayor + 1;
+	}
+	int nivelesIzq = contarNiveles(nodos[idx].izq);
+	int nivelesDer = contarNiveles(nodos[idx].der);
+	mayor = (nivelesIzq > nivelesDer) ? nivelesIzq : nivelesDer;
+	return mayor + 1;
+}
+
+int VistaArbol::contarHojas(int idx) const {
+	if (nodos[idx].izq == -1) return 1;
+	int total = 0;
+	for (int hijo = nodos[idx].izq; hijo != -1; hijo = nodos[hijo].der) {
+		total += contarHojas(hijo);
+	}
+	return total;
+}
+
+void VistaArbol::posicionarBinario(int idx, int profundidad, int& columna, float separacionY) {
 	if (idx < 0 || idx >= totalNodos) return;
-	
-	float centroX = (xMin + xMax) / 2.0f;
-	posiciones[idx].x = centroX;
+	posicionarBinario(nodos[idx].izq, profundidad + 1, columna, separacionY);
+	float anchoColumna = (area.width - 40.0f) / totalNodos;
+	posiciones[idx].x = area.left + 20.0f + (columna + 0.5f) * anchoColumna;
+	posiciones[idx].y = area.top + 50.0f + profundidad * separacionY;
+	posiciones[idx].calculada = true;
+	columna++;
+	posicionarBinario(nodos[idx].der, profundidad + 1, columna, separacionY);
+}
+
+void VistaArbol::posicionarGeneral(int idx, float xMin, float xMax, float y, float separacionY) {
+	posiciones[idx].x = (xMin + xMax) / 2.0f;
 	posiciones[idx].y = y;
 	posiciones[idx].calculada = true;
-	
-	int izq = nodos[idx].izq;
-	int der = nodos[idx].der;
-	
-	if (izq != -1) {
-		calcularPosiciones(izq, xMin, centroX, y + separacionY, separacionY);
-	}
-	if (der != -1) {
-		calcularPosiciones(der, centroX, xMax, y + separacionY, separacionY);
+	float hojasTotales = (float)contarHojas(idx);
+	float x = xMin;
+	for (int hijo = nodos[idx].izq; hijo != -1; hijo = nodos[hijo].der) {
+		float anchoHijo = (xMax - xMin) * contarHojas(hijo) / hojasTotales;
+		posicionarGeneral(hijo, x, x + anchoHijo, y + separacionY, separacionY);
+		x += anchoHijo;
 	}
 }
 
+void VistaArbol::ordenRecursivo(int idx, int recorrido, int orden[], int& cantidad) const {
+	if (idx < 0 || idx >= totalNodos) return;
+	if (recorrido == RECORRIDO_PREORDEN) {
+		orden[cantidad++] = idx;
+	}
+	if (esGeneral) {
+		int primerHijo = nodos[idx].izq;
+		ordenRecursivo(primerHijo, recorrido, orden, cantidad);
+		if (recorrido == RECORRIDO_INORDEN) {
+			orden[cantidad++] = idx;
+		}
+		for (int hijo = (primerHijo == -1) ? -1 : nodos[primerHijo].der; hijo != -1; hijo = nodos[hijo].der) {
+			ordenRecursivo(hijo, recorrido, orden, cantidad);
+		}
+		if (recorrido == RECORRIDO_POSTORDEN) {
+			orden[cantidad++] = idx;
+		}
+		return;
+	}
+	ordenRecursivo(nodos[idx].izq, recorrido, orden, cantidad);
+	if (recorrido == RECORRIDO_INORDEN) {
+		orden[cantidad++] = idx;
+	}
+	ordenRecursivo(nodos[idx].der, recorrido, orden, cantidad);
+	if (recorrido == RECORRIDO_POSTORDEN) {
+		orden[cantidad++] = idx;
+	}
+}
+
+int VistaArbol::calcularOrden(int recorrido, int orden[]) const {
+	int cantidad = 0;
+	if (raiz == -1) return 0;
+	if (recorrido != RECORRIDO_NIVELES) {
+		ordenRecursivo(raiz, recorrido, orden, cantidad);
+		return cantidad;
+	}
+	Cola cola;
+	cola.encolar(raiz);
+	while (!cola.estaVacia()) {
+		int actual = cola.desencolar();
+		orden[cantidad++] = actual;
+		if (esGeneral) {
+			for (int hijo = nodos[actual].izq; hijo != -1; hijo = nodos[hijo].der) {
+				cola.encolar(hijo);
+			}
+		} else {
+			if (nodos[actual].izq != -1) cola.encolar(nodos[actual].izq);
+			if (nodos[actual].der != -1) cola.encolar(nodos[actual].der);
+		}
+	}
+	return cantidad;
+}
+
 void VistaArbol::cargarArbol(const NodoVisual listaNodos[], int cantidad, int indiceRaiz, 
-							 const string& tituloArbol, bool esArbolAVL) {
+							 const string& tituloArbol, bool esArbolAVL, bool esArbolGeneral) {
 	limpiar();
 	if (cantidad <= 0 || indiceRaiz < 0) return;
 	
@@ -60,14 +147,24 @@ void VistaArbol::cargarArbol(const NodoVisual listaNodos[], int cantidad, int in
 	this->raiz = indiceRaiz;
 	this->titulo = tituloArbol;
 	this->esAVL = esArbolAVL;
+	this->esGeneral = esArbolGeneral;
 	
 	for (int i = 0; i < totalNodos; i++) {
 		nodos[i] = listaNodos[i];
 	}
 	
 	float separacionY = 65.0f;
+	int niveles = contarNiveles(raiz);
+	if (niveles > 1 && (area.height - 90.0f) / (niveles - 1) < separacionY) {
+		separacionY = (area.height - 90.0f) / (niveles - 1);
+	}
 	float inicioY = area.top + 50.0f;
-	calcularPosiciones(raiz, area.left + 20.0f, area.left + area.width - 20.0f, inicioY, separacionY);
+	if (esGeneral) {
+		posicionarGeneral(raiz, area.left + 20.0f, area.left + area.width - 20.0f, inicioY, separacionY);
+	} else {
+		int columna = 0;
+		posicionarBinario(raiz, 0, columna, separacionY);
+	}
 }
 
 void VistaArbol::dibujarConectores(sf::RenderWindow& ventana) const {
@@ -78,6 +175,13 @@ void VistaArbol::dibujarConectores(sf::RenderWindow& ventana) const {
 		
 		float px = posiciones[i].x;
 		float py = posiciones[i].y;
+		
+		if (esGeneral) {
+			for (int hijo = nodos[i].izq; hijo != -1; hijo = nodos[hijo].der) {
+				Dibujo::dibujarFlechaDirigida(ventana, px, py, posiciones[hijo].x, posiciones[hijo].y, colorLinea, 1.8f, "", 18.0f);
+			}
+			continue;
+		}
 		
 		int izq = nodos[i].izq;
 		if (izq != -1 && posiciones[izq].calculada) {

@@ -29,7 +29,7 @@ int Grafo::agregarCiudad(string codigo, string nombre, float posX, float posY) {
 	}
 	int Existente = buscarIndicePorCodigo(codigo);
 	if (Existente != -1) {
-		return Existente;
+		return -1;
 	}
 	int id = cantidadCiudades;
 	ciudades[id].id = id;

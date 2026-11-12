@@ -10,6 +10,8 @@ PantallasCliente::PantallasCliente() {
 	bfPorTiempo = false;
 	bfPaginaActual = 0;
 	bfTotalDestinos = 0;
+	bfOrigen = -1;
+	reservaPorTiempo = false;
 	abbCargado = false;
 	
 	textoInfoDijkstra = "Haz clic en dos ciudades del mapa para definir ORIGEN y DESTINO.";
@@ -31,7 +33,7 @@ void PantallasCliente::inicializarControles() {
 	btnCriterioCosto = Boton(270.0f, 570.0f, 150.0f, 28.0f, "Menor Costo ($)", 
 							 sf::Color(24, 34, 52), sf::Color(38, 52, 78));
 	btnCriterioCosto.setActivo(true);
-	btnCriterioTiempo = Boton(430.0f, 570.0f, 150.0f, 28.0f, "Menor Tiempo (min)", 
+	btnCriterioTiempo = Boton(430.0f, 570.0f, 150.0f, 28.0f, "Menor Tiempo (h)", 
 							  sf::Color(24, 34, 52), sf::Color(38, 52, 78));
 	btnCalcularDijkstra = Boton(590.0f, 570.0f, 130.0f, 28.0f, "Calcular Ruta", 
 								sf::Color(14, 55, 75), sf::Color(20, 80, 110), Dibujo::COLOR_CIAN_ACENTO);
@@ -44,6 +46,8 @@ void PantallasCliente::inicializarControles() {
 						  sf::Color(14, 55, 75), sf::Color(20, 80, 110), Dibujo::COLOR_CIAN_ACENTO);
 	btnBFPrev = Boton(620.0f, 570.0f, 32.0f, 28.0f, "<", sf::Color(24, 34, 52), sf::Color(38, 52, 78));
 	btnBFNext = Boton(660.0f, 570.0f, 32.0f, 28.0f, ">", sf::Color(24, 34, 52), sf::Color(38, 52, 78));
+	btnAnimarBF = Boton(1110.0f, 570.0f, 140.0f, 28.0f, "Animar a Destino",
+						sf::Color(16, 50, 36), sf::Color(22, 75, 52), Dibujo::COLOR_VERDE_EXITO);
 	
 	txtBuscarABB = CajaTexto(270.0f, 572.0f, 200.0f, 28.0f, "Nombre de ciudad...", 24);
 	btnBuscarABB = Boton(480.0f, 572.0f, 100.0f, 28.0f, "Buscar", 
@@ -55,11 +59,18 @@ void PantallasCliente::inicializarControles() {
 	btnPostorden = Boton(985.0f, 572.0f, 115.0f, 28.0f, "Postorden");
 	btnNiveles = Boton(1110.0f, 572.0f, 115.0f, 28.0f, "Por Niveles");
 	
-	txtCedula = CajaTexto(270.0f, 572.0f, 180.0f, 28.0f, "Cedula (ej. 102340567)", 15);
-	txtNombre = CajaTexto(460.0f, 572.0f, 230.0f, 28.0f, "Nombre Pasajero", 25);
-	btnConfirmarReserva = Boton(700.0f, 572.0f, 160.0f, 28.0f, "Confirmar Reserva", 
+	txtCedula = CajaTexto(270.0f, 572.0f, 150.0f, 28.0f, "Cedula (ej. 102340567)", 15);
+	txtNombre = CajaTexto(430.0f, 572.0f, 190.0f, 28.0f, "Nombre Pasajero", 25);
+	btnReservaCosto = Boton(630.0f, 572.0f, 95.0f, 28.0f, "Menor Costo",
+							sf::Color(24, 34, 52), sf::Color(38, 52, 78));
+	btnReservaCosto.setActivo(true);
+	btnReservaTiempo = Boton(735.0f, 572.0f, 95.0f, 28.0f, "Menor Tiempo",
+							 sf::Color(24, 34, 52), sf::Color(38, 52, 78));
+	btnVerViaje = Boton(840.0f, 572.0f, 100.0f, 28.0f, "Ver Viaje",
+						sf::Color(14, 55, 75), sf::Color(20, 80, 110), Dibujo::COLOR_CIAN_ACENTO);
+	btnConfirmarReserva = Boton(950.0f, 572.0f, 150.0f, 28.0f, "Confirmar Reserva",
 								sf::Color(16, 50, 36), sf::Color(22, 75, 52), Dibujo::COLOR_VERDE_EXITO);
-	btnLimpiarReserva = Boton(870.0f, 572.0f, 110.0f, 28.0f, "Limpiar", 
+	btnLimpiarReserva = Boton(1110.0f, 572.0f, 90.0f, 28.0f, "Limpiar",
 							  sf::Color(24, 34, 52), sf::Color(38, 52, 78));
 }
 
@@ -103,8 +114,8 @@ void PantallasCliente::procesarDijkstra(const sf::Event& evento, App& app) {
 			return;
 		}
 		
-		ultimaRutaPasajero = Dijkstra::calcularRuta(grafo, origen, destino, dijkstraPorTiempo ? 1 : 0);
-		ultimaRutaEquipaje = Dijkstra::calcularRutaEquipaje(grafo, origen, destino, 0, ultimaRutaPasajero);
+		ultimaRutaPasajero = Dijkstra::calcularRuta(grafo, origen, destino, dijkstraPorTiempo ? CRITERIO_DURACION : CRITERIO_COSTO);
+		ultimaRutaEquipaje = Dijkstra::calcularRutaEquipaje(grafo, origen, destino, CRITERIO_COSTO, ultimaRutaPasajero);
 		app.getVistaMapa().setRutas(ultimaRutaPasajero, ultimaRutaEquipaje);
 		
 		Ciudad cO = grafo.getCiudad(origen);
@@ -114,7 +125,7 @@ void PantallasCliente::procesarDijkstra(const sf::Event& evento, App& app) {
 		if (ultimaRutaPasajero.existe) {
 			textoRutaPasajero = "Pasajero (Cian): " + formatearRuta(grafo, ultimaRutaPasajero) + 
 				" | Costo: $" + to_string((int)ultimaRutaPasajero.costoTotal) + 
-				" | Duracion: " + to_string((int)ultimaRutaPasajero.duracionTotal) + " min | Escalas: " + to_string(ultimaRutaPasajero.escalas);
+				" | Duracion: " + Texto::formatoHoras(ultimaRutaPasajero.duracionTotal) + " | Escalas: " + to_string(ultimaRutaPasajero.escalas);
 			textoRutaEquipaje = "Equipaje (Naranja - mas barata): " + formatearRuta(grafo, ultimaRutaEquipaje) + 
 				" | Costo: $" + to_string((int)ultimaRutaEquipaje.costoTotal) + " | Escalas: " + to_string(ultimaRutaEquipaje.escalas);
 		} else {
@@ -136,26 +147,39 @@ void PantallasCliente::procesarBellmanFord(const sf::Event& evento, App& app) {
 		int origen = app.getVistaMapa().getOrigen();
 		const Grafo& grafo = app.getSistema().getGrafo();
 		if (origen == -1) {
-			origen = 0;
-			app.getVistaMapa().setOrigen(0);
+			textoInfoBF = "Selecciona primero una ciudad ORIGEN en el mapa.";
+			return;
 		}
-		bfTotalDestinos = BellmanFord::calcularTodosLosDestinos(grafo, origen, bfPorTiempo ? 1 : 0, bfResultados);
+		bfOrigen = origen;
+		bfTotalDestinos = BellmanFord::calcularTodosLosDestinos(grafo, origen, bfPorTiempo ? CRITERIO_DURACION : CRITERIO_COSTO, bfResultados);
 		bfPaginaActual = 0;
-		
+		app.getVistaMapa().setCaminosBF(bfResultados, grafo.getCantidadCiudades());
+
 		Ciudad cO = grafo.getCiudad(origen);
-		bool cicloNeg = (bfTotalDestinos > 0 && bfResultados[0].cicloNegativo);
-		textoInfoBF = "Origen: " + cO.nombre + " [" + cO.codigo + "] | Destinos alcanzables: " + to_string(bfTotalDestinos) + 
-			" | Ciclo Negativo: " + (cicloNeg ? "DETECTADO!" : "Ninguno (Grafo consistente)");
+		bool cicloNeg = bfResultados[origen].cicloNegativo;
+		textoInfoBF = "Origen: " + cO.nombre + " [" + cO.codigo + "] | Alcanzables: " + to_string(bfTotalDestinos) +
+			" de " + to_string(grafo.getCantidadCiudades() - 1) + " | Ciclo Negativo: " + (cicloNeg ? "DETECTADO!" : "Ninguno");
 	} else if (btnBFPrev.fueClickeado(evento)) {
 		if (bfPaginaActual > 0) bfPaginaActual--;
 	} else if (btnBFNext.fueClickeado(evento)) {
-		int maxPag = (bfTotalDestinos > 0) ? (bfTotalDestinos - 1) / 6 : 0;
+		int totalCiudades = app.getSistema().getGrafo().getCantidadCiudades();
+		int maxPag = (totalCiudades > 1) ? (totalCiudades - 2) / 6 : 0;
 		if (bfPaginaActual < maxPag) bfPaginaActual++;
+	} else if (btnAnimarBF.fueClickeado(evento)) {
+		int destino = app.getVistaMapa().getDestino();
+		if (bfOrigen == -1 || destino == -1 || !bfResultados[destino].existe) {
+			textoInfoBF = "Calcula los destinos y luego haz clic en un destino alcanzable del mapa.";
+			return;
+		}
+		ResultadoRuta sinEquipaje;
+		sinEquipaje.existe = false;
+		app.getVistaMapa().setRutas(bfResultados[destino], sinEquipaje);
+		app.getAnimacion().iniciarVuelo(bfResultados[destino], sinEquipaje, app.getSistema().getGrafo());
 	}
 }
 
 void PantallasCliente::procesarABB(const sf::Event& evento, App& app) {
-	if (!abbCargado) {
+	if (!abbCargado || abbCiudades.tamanio() != app.getSistema().getGrafo().getCantidadCiudades()) {
 		construirABB(app);
 	}
 	
@@ -166,6 +190,11 @@ void PantallasCliente::procesarABB(const sf::Event& evento, App& app) {
 		if (q.empty()) {
 			textoResultadoABB = "Ingresa el nombre o codigo de una ciudad a buscar.";
 			return;
+		}
+		const Grafo& grafo = app.getSistema().getGrafo();
+		int indiceCodigo = grafo.buscarIndicePorCodigo(Texto::mayusculas(q));
+		if (indiceCodigo != -1) {
+			q = grafo.getCiudad(indiceCodigo).nombre;
 		}
 		ElementoABB elem;
 		if (abbCiudades.buscar(q, elem)) {
@@ -188,32 +217,51 @@ void PantallasCliente::procesarABB(const sf::Event& evento, App& app) {
 		}
 	} else if (btnPreorden.fueClickeado(evento)) {
 		textoRecorridoABB = "Preorden: " + abbCiudades.preorden();
-		if (app.getMostrarVistaArbol()) {
-			app.getAnimacion().iniciarRecorridoArbol(abbCiudades.tamanio(), 0.5f);
-		}
+		app.animarRecorridoArbol(RECORRIDO_PREORDEN);
 	} else if (btnInorden.fueClickeado(evento)) {
 		textoRecorridoABB = "Inorden (Alfabetico): " + abbCiudades.inorden();
-		if (app.getMostrarVistaArbol()) {
-			app.getAnimacion().iniciarRecorridoArbol(abbCiudades.tamanio(), 0.5f);
-		}
+		app.animarRecorridoArbol(RECORRIDO_INORDEN);
 	} else if (btnPostorden.fueClickeado(evento)) {
 		textoRecorridoABB = "Postorden: " + abbCiudades.postorden();
-		if (app.getMostrarVistaArbol()) {
-			app.getAnimacion().iniciarRecorridoArbol(abbCiudades.tamanio(), 0.5f);
-		}
+		app.animarRecorridoArbol(RECORRIDO_POSTORDEN);
 	} else if (btnNiveles.fueClickeado(evento)) {
 		textoRecorridoABB = "Por Niveles (Anchura): " + abbCiudades.porNiveles();
-		if (app.getMostrarVistaArbol()) {
-			app.getAnimacion().iniciarRecorridoArbol(abbCiudades.tamanio(), 0.5f);
-		}
+		app.animarRecorridoArbol(RECORRIDO_NIVELES);
 	}
 }
 
 void PantallasCliente::procesarReserva(const sf::Event& evento, App& app) {
 	txtCedula.procesarEvento(evento);
 	txtNombre.procesarEvento(evento);
-	
-	if (btnConfirmarReserva.fueClickeado(evento)) {
+
+	if (btnReservaCosto.fueClickeado(evento) || btnReservaTiempo.fueClickeado(evento)) {
+		reservaPorTiempo = btnReservaTiempo.fueClickeado(evento);
+		btnReservaCosto.setActivo(!reservaPorTiempo);
+		btnReservaTiempo.setActivo(reservaPorTiempo);
+	} else if (btnVerViaje.fueClickeado(evento)) {
+		int origen = app.getVistaMapa().getOrigen();
+		int destino = app.getVistaMapa().getDestino();
+		if (origen == -1 || destino == -1) {
+			textoResultadoReserva = "Error: Debes seleccionar origen y destino en el mapa.";
+			return;
+		}
+		const Grafo& grafo = app.getSistema().getGrafo();
+		ResultadoRuta ruta = Dijkstra::calcularRuta(grafo, origen, destino, reservaPorTiempo ? CRITERIO_DURACION : CRITERIO_COSTO);
+		ResultadoRuta maleta = Dijkstra::calcularRutaEquipaje(grafo, origen, destino, CRITERIO_COSTO, ruta);
+		app.getVistaMapa().setRutas(ruta, maleta);
+		string listaVuelos = app.getSistema().vuelosDeRuta(ruta);
+		if (!ruta.existe) {
+			textoResultadoReserva = "No existe ruta entre esas ciudades.";
+			textoDetalleReserva = "";
+		} else if (listaVuelos.empty()) {
+			textoResultadoReserva = "Ruta " + formatearRuta(grafo, ruta) + ": algun tramo no tiene vuelo con asientos libres.";
+			textoDetalleReserva = "";
+		} else {
+			textoResultadoReserva = "Viaje: " + formatearRuta(grafo, ruta) + " | $" + to_string((int)ruta.costoTotal) +
+				" | " + Texto::formatoHoras(ruta.duracionTotal) + " | Escalas: " + to_string(ruta.escalas);
+			textoDetalleReserva = "Vuelos por tramo: " + listaVuelos + " | Equipaje: " + formatearRuta(grafo, maleta);
+		}
+	} else if (btnConfirmarReserva.fueClickeado(evento)) {
 		string cedStr = txtCedula.getTexto();
 		string nomStr = txtNombre.getTexto();
 		int origen = app.getVistaMapa().getOrigen();
@@ -233,14 +281,14 @@ void PantallasCliente::procesarReserva(const sf::Event& evento, App& app) {
 		string codD = app.getSistema().getGrafo().getCiudad(destino).codigo;
 		
 		Reserva rCreada;
-		bool ok = app.getSistema().crearReserva(cedula, nomStr, codO, codD, 0, 0, rCreada);
+		bool ok = app.getSistema().crearReserva(cedula, nomStr, codO, codD, reservaPorTiempo ? CRITERIO_DURACION : CRITERIO_COSTO, CRITERIO_COSTO, rCreada);
 		if (ok) {
-			textoResultadoReserva = "¡Reserva #" + to_string(rCreada.idReserva) + " confirmada exitosamente!";
-			textoDetalleReserva = "Pasajero: " + nomStr + " (Ced: " + to_string(cedula) + ") | Ruta: " + codO + " -> " + codD + " | Insertado en Arbol AVL Pasajeros.";
+			textoResultadoReserva = "Reserva #" + to_string(rCreada.idReserva) + " confirmada exitosamente!";
+			textoDetalleReserva = "Pasajero: " + nomStr + " (Ced: " + to_string(cedula) + ") | Ruta: " + rCreada.rutaPasajero + " | Vuelos: " + rCreada.vuelos;
 			txtCedula.limpiar();
 			txtNombre.limpiar();
 		} else {
-			textoResultadoReserva = "No se pudo realizar la reserva. Verifica que exista conexion aerea o disponibilidad.";
+			textoResultadoReserva = "No se pudo realizar la reserva. Verifica que exista ruta y vuelos con asientos libres.";
 		}
 	} else if (btnLimpiarReserva.fueClickeado(evento)) {
 		txtCedula.limpiar();
@@ -275,6 +323,7 @@ void PantallasCliente::actualizar(sf::Vector2f posMouse, App& app) {
 		btnCalcularBF.actualizar(posMouse);
 		btnBFPrev.actualizar(posMouse);
 		btnBFNext.actualizar(posMouse);
+		btnAnimarBF.actualizar(posMouse);
 	} else if (tab == PESTANA_ABB_CIUDADES) {
 		btnBuscarABB.actualizar(posMouse);
 		btnVerArbolABB.actualizar(posMouse);
@@ -283,6 +332,9 @@ void PantallasCliente::actualizar(sf::Vector2f posMouse, App& app) {
 		btnPostorden.actualizar(posMouse);
 		btnNiveles.actualizar(posMouse);
 	} else if (tab == PESTANA_RESERVA_VUELO) {
+		btnReservaCosto.actualizar(posMouse);
+		btnReservaTiempo.actualizar(posMouse);
+		btnVerViaje.actualizar(posMouse);
 		btnConfirmarReserva.actualizar(posMouse);
 		btnLimpiarReserva.actualizar(posMouse);
 	}
@@ -309,32 +361,42 @@ void PantallasCliente::dibujarPantallaBellmanFord(sf::RenderWindow& ventana, App
 	btnCalcularBF.dibujar(ventana);
 	btnBFPrev.dibujar(ventana);
 	btnBFNext.dibujar(ventana);
-	
+	btnAnimarBF.dibujar(ventana);
+
 	Dibujo::dibujarTexto(ventana, textoInfoBF, 705.0f, 577.0f, 11, Dibujo::COLOR_TEXTO_CUERPO);
-	
-	if (bfTotalDestinos == 0) {
+
+	const Grafo& grafo = app.getSistema().getGrafo();
+	if (bfOrigen == -1 || bfOrigen >= grafo.getCantidadCiudades()) {
 		Dibujo::dibujarTexto(ventana, "Presiona 'Calcular Destinos' para calcular todas las rutas minimas desde el origen.", 270.0f, 630.0f, 12, Dibujo::COLOR_TEXTO_MUTED);
 		return;
 	}
-	
+
 	int inicio = bfPaginaActual * 6;
-	int fin = inicio + 6;
-	if (fin > bfTotalDestinos) fin = bfTotalDestinos;
-	
-	const Grafo& grafo = app.getSistema().getGrafo();
-	for (int i = inicio; i < fin; i++) {
-		int col = (i - inicio) % 3;
-		int row = (i - inicio) / 3;
+	int mostrados = 0;
+	int posicion = 0;
+	for (int i = 0; i < grafo.getCantidadCiudades() && mostrados < 6; i++) {
+		if (i == bfOrigen) continue;
+		if (posicion < inicio) {
+			posicion++;
+			continue;
+		}
+		int col = mostrados % 3;
+		int row = mostrados / 3;
 		float posX = 270.0f + col * 330.0f;
 		float posY = 615.0f + row * 45.0f;
-		
-		Ciudad dest = grafo.getCiudad(bfResultados[i].nodos[bfResultados[i].cantidadNodos - 1]);
-		string valorMetrica = bfPorTiempo ? (to_string((int)bfResultados[i].duracionTotal) + " min") : ("$" + to_string((int)bfResultados[i].costoTotal));
-		string linea = "[" + dest.codigo + "] " + dest.nombre + " (" + valorMetrica + ")";
-		string escala = "Ruta: " + formatearRuta(grafo, bfResultados[i]);
-		
-		Dibujo::dibujarTexto(ventana, linea, posX, posY, 11, Dibujo::COLOR_VERDE_EXITO);
-		Dibujo::dibujarTexto(ventana, escala, posX, posY + 16.0f, 10, Dibujo::COLOR_TEXTO_MUTED);
+
+		Ciudad dest = grafo.getCiudad(i);
+		if (bfResultados[i].existe) {
+			string valorMetrica = bfPorTiempo ? Texto::formatoHoras(bfResultados[i].duracionTotal) : ("$" + to_string((int)bfResultados[i].costoTotal));
+			string linea = "[" + dest.codigo + "] " + dest.nombre + " (" + valorMetrica + ")";
+			Dibujo::dibujarTexto(ventana, linea, posX, posY, 11, Dibujo::COLOR_VERDE_EXITO);
+			Dibujo::dibujarTexto(ventana, "Ruta: " + formatearRuta(grafo, bfResultados[i]), posX, posY + 16.0f, 10, Dibujo::COLOR_TEXTO_MUTED);
+		} else {
+			Dibujo::dibujarTexto(ventana, "[" + dest.codigo + "] " + dest.nombre, posX, posY, 11, Dibujo::COLOR_ROJO_ALERTA);
+			Dibujo::dibujarTexto(ventana, "Sin ruta desde el origen", posX, posY + 16.0f, 10, Dibujo::COLOR_TEXTO_MUTED);
+		}
+		mostrados++;
+		posicion++;
 	}
 }
 
@@ -360,6 +422,9 @@ void PantallasCliente::dibujarPantallaReserva(sf::RenderWindow& ventana, App& ap
 	
 	txtCedula.dibujar(ventana);
 	txtNombre.dibujar(ventana);
+	btnReservaCosto.dibujar(ventana);
+	btnReservaTiempo.dibujar(ventana);
+	btnVerViaje.dibujar(ventana);
 	btnConfirmarReserva.dibujar(ventana);
 	btnLimpiarReserva.dibujar(ventana);
 	

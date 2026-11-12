@@ -1,5 +1,6 @@
 #include "ArbolABB.h"
 #include "Cola.h"
+#include "Texto.h"
 
 static const int MAX_NODOS_ABB = 256;
 
@@ -38,9 +39,11 @@ NodoABB* ArbolABB::insertarNodo(NodoABB* nodo, const ElementoABB& dato, bool& in
 		return nuevo;
 	}
 	
-	if (dato.nombre < nodo->dato.nombre) {
+	string clave = Texto::minusculas(dato.nombre);
+	string claveNodo = Texto::minusculas(nodo->dato.nombre);
+	if (clave < claveNodo) {
 		nodo->izq = insertarNodo(nodo->izq, dato, insertado);
-	} else if (dato.nombre > nodo->dato.nombre) {
+	} else if (clave > claveNodo) {
 		nodo->der = insertarNodo(nodo->der, dato, insertado);
 	} else {
 		insertado = false; 
@@ -63,14 +66,13 @@ NodoABB* ArbolABB::buscarNodo(NodoABB* nodo, const string& texto) const {
 	if (nodo == nullptr) {
 		return nullptr;
 	}
-	if (nodo->dato.nombre == texto || nodo->dato.codigo == texto) {
+	string clave = Texto::minusculas(texto);
+	string claveNodo = Texto::minusculas(nodo->dato.nombre);
+	if (clave == claveNodo) {
 		return nodo;
 	}
-	if (texto < nodo->dato.nombre) {
-		NodoABB* encontradoIzq = buscarNodo(nodo->izq, texto);
-		if (encontradoIzq != nullptr) {
-			return encontradoIzq;
-		}
+	if (clave < claveNodo) {
+		return buscarNodo(nodo->izq, texto);
 	}
 	return buscarNodo(nodo->der, texto);
 }

@@ -8,3 +8,4 @@ LIM;Lima;400;590
 GRU;Sao Paulo;590;620
 MAD;Madrid;760;180
 CDG;Paris;810;130
+JAC;Jaco;657;413

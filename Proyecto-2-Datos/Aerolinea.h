@@ -37,19 +37,22 @@ public:
 	bool registrarRuta(string codigoOrigen, string codigoDestino, double costo, double duracion);
 	bool eliminarRuta(string codigoOrigen, string codigoDestino);
 	
-	bool registrarAeronave(string codigo, string modelo, int capacidad, string estado);
+	bool registrarAeronave(string codigo, string placa, string marca, string modelo, int capacidad, string estado);
 	bool registrarTripulante(string id, string nombre, string rol);
-	bool asignarTripulanteAVuelo(string idTripulante, string codigoVuelo);
+	bool asignarTripulanteAAeronave(string idTripulante, string codigoAeronave);
 	bool programarVuelo(string codigo, string origen, string destino, string fechaHora, double costo, double duracion, string codigoAeronave);
 	
 	bool crearReserva(int cedula, string nombre, string codigoOrigen, string codigoDestino, int criterioPasajero, int criterioEquipaje, Reserva& reservaCreada);
 	bool cancelarReserva(int idReserva);
+	string vuelosDeRuta(const ResultadoRuta& ruta) const;
+	string pasajerosDeVuelo(string codigoVuelo) const;
+	int buscarVuelo(string codigo) const;
 	
 	ResultadoRuta buscarRutaDijkstra(string codigoOrigen, string codigoDestino, int criterio) const;
 	ResultadoRuta buscarRutaBellmanFord(string codigoOrigen, string codigoDestino, int criterio) const;
 	string obtenerCiudadesABBInorden() const;
-	ResultadoMST obtenerRedPrim() const;
-	ResultadoMST obtenerRedKruskal() const;
+	ResultadoMST obtenerRedPrim(int ciudadInicial = 0) const;
+	ResultadoMST obtenerRedKruskal(int ciudadInicial = 0) const;
 	
 	const Grafo& getGrafo() const;
 	const ArbolAVL& getAvlPasajeros() const;

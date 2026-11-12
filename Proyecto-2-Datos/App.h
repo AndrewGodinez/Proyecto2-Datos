@@ -19,11 +19,14 @@ enum PestanaSistema {
 	PESTANA_AVL_PASAJEROS,
 	PESTANA_MST_EXPANSION,
 	PESTANA_EQUIPAJE_COMPARATIVA,
+	PESTANA_CIUDADES_RUTAS,
+	PESTANA_VUELOS_PASAJEROS,
 	TOTAL_PESTANAS
 };
 
 class PantallasCliente;
 class PantallasAdmin;
+class PantallasGestion;
 
 class App {
 private:
@@ -41,6 +44,7 @@ private:
 	
 	PantallasCliente* pantallasCliente;
 	PantallasAdmin* pantallasAdmin;
+	PantallasGestion* pantallasGestion;
 	
 	void inicializarMenuLateral();
 	void dibujarBarraSuperior();
@@ -64,6 +68,7 @@ public:
 	
 	bool getMostrarVistaArbol() const { return mostrarVistaArbol; }
 	void setMostrarVistaArbol(bool mostrar) { mostrarVistaArbol = mostrar; }
+	void animarRecorridoArbol(int recorrido);
 };
 
 #endif

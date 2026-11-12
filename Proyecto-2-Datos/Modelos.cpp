@@ -7,6 +7,8 @@ Aeronave Modelos::crearAeronave(string campos[]) {
 	aeronave.modelo = campos[1];
 	aeronave.capacidad = Texto::aEntero(campos[2]);
 	aeronave.estado = campos[3];
+	aeronave.placa = campos[4];
+	aeronave.marca = campos[5];
 	return aeronave;
 }
 
@@ -16,7 +18,7 @@ Tripulante Modelos::crearTripulante(string campos[]) {
 	tripulante.nombre = campos[1];
 	tripulante.rol = campos[2];
 	tripulante.disponible = (Texto::aEntero(campos[3]) != 0);
-	tripulante.vueloAsignado = campos[4];
+	tripulante.aeronaveAsignada = campos[4];
 	return tripulante;
 }
 
@@ -45,16 +47,17 @@ Reserva Modelos::crearReserva(string campos[]) {
 	reserva.costoTotal = Texto::aDecimal(campos[7]);
 	reserva.duracionTotal = Texto::aDecimal(campos[8]);
 	reserva.activa = (Texto::aEntero(campos[9]) != 0);
+	reserva.vuelos = campos[10];
 	return reserva;
 }
 
 string Modelos::formatearAeronave(const Aeronave& aeronave) {
-	return aeronave.codigo + ";" + aeronave.modelo + ";" + to_string(aeronave.capacidad) + ";" + aeronave.estado;
+	return aeronave.codigo + ";" + aeronave.modelo + ";" + to_string(aeronave.capacidad) + ";" + aeronave.estado + ";" + aeronave.placa + ";" + aeronave.marca;
 }
 
 string Modelos::formatearTripulante(const Tripulante& tripulante) {
 	string disp = tripulante.disponible ? "1" : "0";
-	return tripulante.id + ";" + tripulante.nombre + ";" + tripulante.rol + ";" + disp + ";" + tripulante.vueloAsignado;
+	return tripulante.id + ";" + tripulante.nombre + ";" + tripulante.rol + ";" + disp + ";" + tripulante.aeronaveAsignada;
 }
 
 string Modelos::formatearVuelo(const Vuelo& vuelo) {
@@ -63,5 +66,5 @@ string Modelos::formatearVuelo(const Vuelo& vuelo) {
 
 string Modelos::formatearReserva(const Reserva& reserva) {
 	string act = reserva.activa ? "1" : "0";
-	return to_string(reserva.idReserva) + ";" + to_string(reserva.cedulaPasajero) + ";" + reserva.nombrePasajero + ";" + reserva.origen + ";" + reserva.destino + ";" + reserva.rutaPasajero + ";" + reserva.rutaEquipaje + ";" + to_string((int)reserva.costoTotal) + ";" + to_string(reserva.duracionTotal) + ";" + act;
+	return to_string(reserva.idReserva) + ";" + to_string(reserva.cedulaPasajero) + ";" + reserva.nombrePasajero + ";" + reserva.origen + ";" + reserva.destino + ";" + reserva.rutaPasajero + ";" + reserva.rutaEquipaje + ";" + to_string((int)reserva.costoTotal) + ";" + to_string(reserva.duracionTotal) + ";" + act + ";" + reserva.vuelos;
 }

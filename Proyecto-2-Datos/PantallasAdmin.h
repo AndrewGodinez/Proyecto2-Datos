@@ -14,11 +14,6 @@ class App;
 
 class PantallasAdmin {
 private:
-	Boton btnFlotaPrev;
-	Boton btnFlotaNext;
-	int flotaPagina;
-	string textoInfoFlota;
-	
 	CajaTexto txtBuscarPasajero;
 	Boton btnBuscarPasajero;
 	Boton btnVerArbolAVL;
@@ -26,12 +21,15 @@ private:
 	Boton btnInordenAVL;
 	Boton btnPostordenAVL;
 	Boton btnNivelesAVL;
+	CajaTexto txtVueloAVL;
+	Boton btnVerificarVuelo;
 	string textoResultadoAVL;
 	string textoRecorridoAVL;
 	
 	Boton btnPrimCosto;
 	Boton btnKruskalTiempo;
 	Boton btnLimpiarMST;
+	Boton btnVerArbolMST;
 	Boton btnMSTPreorden;
 	Boton btnMSTInorden;
 	Boton btnMSTPostorden;
@@ -52,12 +50,10 @@ private:
 	void inicializarControles();
 	string formatearRuta(const Grafo& grafo, const ResultadoRuta& ruta) const;
 	
-	void procesarFlota(const sf::Event& evento, App& app);
 	void procesarAVL(const sf::Event& evento, App& app);
 	void procesarMST(const sf::Event& evento, App& app);
 	void procesarEquipaje(const sf::Event& evento, App& app);
 	
-	void dibujarPantallaFlota(sf::RenderWindow& ventana, App& app);
 	void dibujarPantallaAVL(sf::RenderWindow& ventana, App& app);
 	void dibujarPantallaMST(sf::RenderWindow& ventana, App& app);
 	void dibujarPantallaEquipaje(sf::RenderWindow& ventana, App& app);

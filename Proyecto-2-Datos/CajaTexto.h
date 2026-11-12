@@ -15,6 +15,7 @@ private:
 	bool tieneFoco;
 	int maxCaracteres;
 	sf::Clock relojCursor;
+	static CajaTexto* cajaActiva;
 	
 public:
 	CajaTexto();
@@ -29,6 +30,8 @@ public:
 	void limpiar();
 	bool getTieneFoco() const;
 	void setFoco(bool foco);
+	static bool hayCajaActiva();
+	static void quitarFocoActivo();
 };
 
 #endif

@@ -2,6 +2,7 @@
 #include "Dibujo.h"
 #include "PantallasCliente.h"
 #include "PantallasAdmin.h"
+#include "PantallasGestion.h"
 #include <iostream>
 
 App::App(Aerolinea& aerolinea) 
@@ -16,6 +17,7 @@ App::App(Aerolinea& aerolinea)
 	mostrarVistaArbol = false;
 	pantallasCliente = new PantallasCliente();
 	pantallasAdmin = new PantallasAdmin();
+	pantallasGestion = new PantallasGestion();
 	
 	inicializarMenuLateral();
 }
@@ -29,6 +31,10 @@ App::~App() {
 		delete pantallasAdmin;
 		pantallasAdmin = nullptr;
 	}
+	if (pantallasGestion != nullptr) {
+		delete pantallasGestion;
+		pantallasGestion = nullptr;
+	}
 }
 
 void App::inicializarMenuLateral() {
@@ -37,10 +43,12 @@ void App::inicializarMenuLateral() {
 			"2. Destinos (Bellman-Ford)",
 			"3. Ciudades (ABB)",
 			"4. Reservar Vuelo",
-			"5. Flota & Vuelos",
+			"5. Flota y Tripulacion",
 			"6. Pasajeros (AVL)",
 			"7. Minimos (Prim/Kruskal)",
-			"8. Equipaje vs Tiempo"
+			"8. Equipaje vs Tiempo",
+			"9. Ciudades y Rutas",
+			"10. Vuelos y Pasajeros"
 	};
 	
 	float inicioY = 90.0f;
@@ -64,10 +72,12 @@ void App::cambiarPestana(PestanaSistema nuevaPestana) {
 		botonesMenu[i].setActivo(i == pestanaActual);
 	}
 	
-	mostrarVistaArbol = (pestanaActual == PESTANA_AVL_PASAJEROS);
+	mostrarVistaArbol = false;
 	
 	vistaMapa.limpiarRutas();
 	animacion.detener();
+	animacion.detenerRecorridoArbol();
+	CajaTexto::quitarFocoActivo();
 }
 
 void App::procesarEventos() {
@@ -80,7 +90,7 @@ void App::procesarEventos() {
 			ventana.close();
 		}
 		
-		if (evento.type == sf::Event::KeyPressed) {
+		if (evento.type == sf::Event::KeyPressed && !CajaTexto::hayCajaActiva()) {
 			if (evento.key.code == sf::Keyboard::Escape) {
 				vistaMapa.limpiarSeleccion();
 				vistaMapa.limpiarRutas();
@@ -108,7 +118,9 @@ void App::procesarEventos() {
 		
 		if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
 			pantallasCliente->procesarEvento(evento, *this);
-		} else if (pestanaActual >= PESTANA_FLOTA_ADMIN && pantallasAdmin != nullptr) {
+		} else if ((pestanaActual == PESTANA_FLOTA_ADMIN || pestanaActual >= PESTANA_CIUDADES_RUTAS) && pantallasGestion != nullptr) {
+			pantallasGestion->procesarEvento(evento, *this);
+		} else if (pantallasAdmin != nullptr) {
 			pantallasAdmin->procesarEvento(evento, *this);
 		}
 	}
@@ -124,7 +136,9 @@ void App::procesarEventos() {
 	
 	if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
 		pantallasCliente->actualizar(posMouse, *this);
-	} else if (pestanaActual >= PESTANA_FLOTA_ADMIN && pantallasAdmin != nullptr) {
+	} else if ((pestanaActual == PESTANA_FLOTA_ADMIN || pestanaActual >= PESTANA_CIUDADES_RUTAS) && pantallasGestion != nullptr) {
+		pantallasGestion->actualizar(posMouse, *this);
+	} else if (pantallasAdmin != nullptr) {
 		pantallasAdmin->actualizar(posMouse, *this);
 	}
 }
@@ -179,7 +193,9 @@ void App::dibujar() {
 	
 	if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
 		pantallasCliente->dibujar(ventana, *this);
-	} else if (pestanaActual >= PESTANA_FLOTA_ADMIN && pantallasAdmin != nullptr) {
+	} else if ((pestanaActual == PESTANA_FLOTA_ADMIN || pestanaActual >= PESTANA_CIUDADES_RUTAS) && pantallasGestion != nullptr) {
+		pantallasGestion->dibujar(ventana, *this);
+	} else if (pantallasAdmin != nullptr) {
 		pantallasAdmin->dibujar(ventana, *this);
 	}
 	
@@ -193,6 +209,15 @@ void App::ejecutar() {
 		actualizar(dt);
 		dibujar();
 	}
+}
+
+void App::animarRecorridoArbol(int recorrido) {
+	if (!mostrarVistaArbol) {
+		return;
+	}
+	int orden[MAX_CIUDADES * 2];
+	int cantidad = vistaArbol.calcularOrden(recorrido, orden);
+	animacion.iniciarRecorridoArbol(orden, cantidad, 0.5f);
 }
 
 PestanaSistema App::getPestanaActual() const { return pestanaActual; }

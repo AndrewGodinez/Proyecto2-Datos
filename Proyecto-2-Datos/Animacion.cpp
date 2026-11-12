@@ -65,9 +65,12 @@ void Animacion::iniciarVuelo(const ResultadoRuta& rutaPasajero, const ResultadoR
 	}
 }
 
-void Animacion::iniciarRecorridoArbol(int cantidadNodos, float intervaloSegundos) {
+void Animacion::iniciarRecorridoArbol(const int orden[], int cantidadNodos, float intervaloSegundos) {
 	detenerRecorridoArbol();
 	if (cantidadNodos <= 0) return;
+	for (int i = 0; i < cantidadNodos && i < MAX_CIUDADES * 2; i++) {
+		ordenArbol[i] = orden[i];
+	}
 	animandoArbol = true;
 	totalNodosArbol = cantidadNodos;
 	nodoActivoArbol = 0;
@@ -83,7 +86,10 @@ void Animacion::detenerRecorridoArbol() {
 }
 
 int Animacion::getNodoActivoArbol() const {
-	return nodoActivoArbol;
+	if (nodoActivoArbol < 0) {
+		return -1;
+	}
+	return ordenArbol[nodoActivoArbol];
 }
 
 bool Animacion::getAnimandoArbol() const {

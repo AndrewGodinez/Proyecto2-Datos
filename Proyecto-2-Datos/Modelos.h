@@ -13,6 +13,8 @@ struct Aeronave {
 	string modelo;
 	int capacidad;
 	string estado;
+	string placa;
+	string marca;
 };
 
 struct Tripulante {
@@ -20,7 +22,7 @@ struct Tripulante {
 	string nombre;
 	string rol;
 	bool disponible;
-	string vueloAsignado;
+	string aeronaveAsignada;
 };
 
 struct Vuelo {
@@ -45,6 +47,7 @@ struct Reserva {
 	double costoTotal;
 	double duracionTotal;
 	bool activa;
+	string vuelos;
 };
 
 class Modelos {

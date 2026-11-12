@@ -9,6 +9,10 @@ public:
 	static int dividirPorPuntoYComa(string linea, string campos[], int maxCampos);
 	static int aEntero(string texto);
 	static double aDecimal(string texto);
+	static string minusculas(string texto);
+	static string mayusculas(string texto);
+	static string formatoHoras(double horas);
+	static bool listaContiene(string lista, string codigo);
 };
 
 #endif
