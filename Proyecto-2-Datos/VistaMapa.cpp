@@ -54,8 +54,9 @@ void VistaMapa::actualizarHover(sf::Vector2f posMouse, const Grafo& grafo) {
 	int total = grafo.getCantidadCiudades();
 	for (int i = 0; i < total; i++) {
 		Ciudad c = grafo.getCiudad(i);
-		float dx = posMouse.x - c.posX;
-		float dy = posMouse.y - c.posY;
+		sf::Vector2f pos = Dibujo::proyectarCiudad(c, grafo);
+		float dx = posMouse.x - pos.x;
+		float dy = posMouse.y - pos.y;
 		if (std::sqrt(dx * dx + dy * dy) <= radioDeteccion) {
 			ciudadHover = i;
 			break;
@@ -72,8 +73,9 @@ int VistaMapa::procesarEvento(const sf::Event& evento, const Grafo& grafo) {
 		int total = grafo.getCantidadCiudades();
 		for (int i = 0; i < total; i++) {
 			Ciudad c = grafo.getCiudad(i);
-			float dx = click.x - c.posX;
-			float dy = click.y - c.posY;
+			sf::Vector2f pos = Dibujo::proyectarCiudad(c, grafo);
+			float dx = click.x - pos.x;
+			float dy = click.y - pos.y;
 			if (std::sqrt(dx * dx + dy * dy) <= radioDeteccion) {
 				if (origenSeleccionado == -1 || (origenSeleccionado != -1 && destinoSeleccionado != -1)) {
 					origenSeleccionado = i;
@@ -96,7 +98,9 @@ void VistaMapa::dibujarRutasBase(sf::RenderWindow& ventana, const Grafo& grafo) 
 	for (int i = 0; i < total; i++) {
 		Ciudad origen  = grafo.getCiudad(rutas[i].origen);
 		Ciudad destino = grafo.getCiudad(rutas[i].destino);
-		Dibujo::dibujarFlechaDirigida(ventana, origen.posX, origen.posY, destino.posX, destino.posY, 
+		sf::Vector2f posO = Dibujo::proyectarCiudad(origen, grafo);
+		sf::Vector2f posD = Dibujo::proyectarCiudad(destino, grafo);
+		Dibujo::dibujarFlechaDirigida(ventana, posO.x, posO.y, posD.x, posD.y, 
 									  colorRutaInactiva, 1.2f, "", 16.0f);
 	}
 }
@@ -108,7 +112,9 @@ void VistaMapa::dibujarRutasResaltadas(sf::RenderWindow& ventana, const Grafo& g
 		for (int i = 0; i < rutaEquipaje.cantidadNodos - 1; i++) {
 			Ciudad a = grafo.getCiudad(rutaEquipaje.nodos[i]);
 			Ciudad b = grafo.getCiudad(rutaEquipaje.nodos[i + 1]);
-			Dibujo::dibujarFlechaDirigida(ventana, a.posX, a.posY, b.posX, b.posY, 
+			sf::Vector2f posA = Dibujo::proyectarCiudad(a, grafo);
+			sf::Vector2f posB = Dibujo::proyectarCiudad(b, grafo);
+			Dibujo::dibujarFlechaDirigida(ventana, posA.x, posA.y, posB.x, posB.y, 
 										  Dibujo::COLOR_NARANJA_EQUIPAJE, 2.5f, "", 16.0f);
 		}
 	}
@@ -117,7 +123,9 @@ void VistaMapa::dibujarRutasResaltadas(sf::RenderWindow& ventana, const Grafo& g
 		for (int i = 0; i < rutaPasajero.cantidadNodos - 1; i++) {
 			Ciudad a = grafo.getCiudad(rutaPasajero.nodos[i]);
 			Ciudad b = grafo.getCiudad(rutaPasajero.nodos[i + 1]);
-			Dibujo::dibujarFlechaDirigida(ventana, a.posX, a.posY, b.posX, b.posY, 
+			sf::Vector2f posA = Dibujo::proyectarCiudad(a, grafo);
+			sf::Vector2f posB = Dibujo::proyectarCiudad(b, grafo);
+			Dibujo::dibujarFlechaDirigida(ventana, posA.x, posA.y, posB.x, posB.y, 
 										  Dibujo::COLOR_CIAN_ACENTO, 3.2f, "", 16.0f);
 		}
 	}
@@ -130,7 +138,9 @@ void VistaMapa::dibujarRedMST(sf::RenderWindow& ventana, const Grafo& grafo) con
 	for (int i = 0; i < redMST.cantidadAristas; i++) {
 		Ciudad a = grafo.getCiudad(redMST.aristas[i].origen);
 		Ciudad b = grafo.getCiudad(redMST.aristas[i].destino);
-		Dibujo::dibujarFlechaDirigida(ventana, a.posX, a.posY, b.posX, b.posY, colorMST, 2.8f, "", 16.0f);
+		sf::Vector2f posA = Dibujo::proyectarCiudad(a, grafo);
+		sf::Vector2f posB = Dibujo::proyectarCiudad(b, grafo);
+		Dibujo::dibujarFlechaDirigida(ventana, posA.x, posA.y, posB.x, posB.y, colorMST, 2.8f, "", 16.0f);
 	}
 }
 
@@ -138,14 +148,15 @@ void VistaMapa::dibujarCiudades(sf::RenderWindow& ventana, const Grafo& grafo) c
 	int total = grafo.getCantidadCiudades();
 	for (int i = 0; i < total; i++) {
 		Ciudad c = grafo.getCiudad(i);
+		sf::Vector2f pos = Dibujo::proyectarCiudad(c, grafo);
 		bool seleccionada = (i == origenSeleccionado || i == destinoSeleccionado);
 		bool hover = (i == ciudadHover);
-		Dibujo::dibujarVerticeCiudad(ventana, c, seleccionada, hover);
+		Dibujo::dibujarVerticeCiudad(ventana, c, pos, seleccionada, hover);
 		
 		if (i == origenSeleccionado) {
-			Dibujo::dibujarTexto(ventana, "ORIGEN", c.posX, c.posY - 26.0f, 10, Dibujo::COLOR_VERDE_EXITO, true);
+			Dibujo::dibujarTexto(ventana, "ORIGEN", pos.x, pos.y - 26.0f, 10, Dibujo::COLOR_VERDE_EXITO, true);
 		} else if (i == destinoSeleccionado) {
-			Dibujo::dibujarTexto(ventana, "DESTINO", c.posX, c.posY - 26.0f, 10, Dibujo::COLOR_ROJO_ALERTA, true);
+			Dibujo::dibujarTexto(ventana, "DESTINO", pos.x, pos.y - 26.0f, 10, Dibujo::COLOR_ROJO_ALERTA, true);
 		}
 	}
 }

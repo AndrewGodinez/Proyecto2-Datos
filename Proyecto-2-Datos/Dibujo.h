@@ -7,6 +7,8 @@
 
 using namespace std;
 
+class Grafo;
+
 class Dibujo {
 private:
 	static sf::Font fuentePrincipal;
@@ -27,12 +29,16 @@ public:
 	static bool inicializarFuente();
 	static const sf::Font& getFuente();
 	
+	static sf::Vector2f proyectarCiudad(const Ciudad& ciudad, const Grafo& grafo);
 
 	static void dibujarPanel(sf::RenderWindow& ventana, float x, float y, float ancho, float alto, 
 							 sf::Color fondo, sf::Color borde = sf::Color::Transparent, float grosorBorde = 1.0f);
 	
 	static void dibujarTexto(sf::RenderWindow& ventana, const string& texto, float x, float y, 
 							 unsigned int tam, sf::Color color, bool centrado = false);
+
+	static void dibujarVerticeCiudad(sf::RenderWindow& ventana, const Ciudad& ciudad, 
+									 sf::Vector2f pos, bool seleccionada = false, bool hover = false);
 
 	static void dibujarVerticeCiudad(sf::RenderWindow& ventana, const Ciudad& ciudad, 
 									 bool seleccionada = false, bool hover = false);

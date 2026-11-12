@@ -40,7 +40,7 @@ void Animacion::iniciarVuelo(const ResultadoRuta& rutaPasajero, const ResultadoR
 		avionPasajero.etiqueta = "Vuelo";
 		
 		Ciudad inicio = grafo.getCiudad(avionPasajero.nodos[0]);
-		avionPasajero.posActual = sf::Vector2f(inicio.posX, inicio.posY);
+		avionPasajero.posActual = Dibujo::proyectarCiudad(inicio, grafo);
 		avionPasajero.angulo = 0.0f;
 		animandoRutas = true;
 	}
@@ -59,7 +59,7 @@ void Animacion::iniciarVuelo(const ResultadoRuta& rutaPasajero, const ResultadoR
 		avionEquipaje.etiqueta = "Equipaje";
 		
 		Ciudad inicio = grafo.getCiudad(avionEquipaje.nodos[0]);
-		avionEquipaje.posActual = sf::Vector2f(inicio.posX, inicio.posY);
+		avionEquipaje.posActual = Dibujo::proyectarCiudad(inicio, grafo);
 		avionEquipaje.angulo = 0.0f;
 		animandoRutas = true;
 	}
@@ -101,8 +101,11 @@ void Animacion::actualizarAvion(AvionAnimado& avion, float dt, const Grafo& graf
 	Ciudad origen  = grafo.getCiudad(avion.nodos[avion.tramoActual]);
 	Ciudad destino = grafo.getCiudad(avion.nodos[avion.tramoActual + 1]);
 	
-	float dx = destino.posX - origen.posX;
-	float dy = destino.posY - origen.posY;
+	sf::Vector2f posO = Dibujo::proyectarCiudad(origen, grafo);
+	sf::Vector2f posD = Dibujo::proyectarCiudad(destino, grafo);
+	
+	float dx = posD.x - posO.x;
+	float dy = posD.y - posO.y;
 	const float PI = 3.14159265f;
 	avion.angulo = std::atan2(dy, dx) * 180.0f / PI;
 	
@@ -112,15 +115,15 @@ void Animacion::actualizarAvion(AvionAnimado& avion, float dt, const Grafo& graf
 		avion.progresoTramo = 0.0f;
 		avion.tramoActual++;
 		if (avion.tramoActual >= avion.cantidadNodos - 1) {
-			avion.posActual = sf::Vector2f(destino.posX, destino.posY);
+			avion.posActual = posD;
 			avion.finalizado = true;
 			return;
 		}
 	}
 	
 	float t = avion.progresoTramo;
-	avion.posActual.x = origen.posX + dx * t;
-	avion.posActual.y = origen.posY + dy * t;
+	avion.posActual.x = posO.x + dx * t;
+	avion.posActual.y = posO.y + dy * t;
 }
 
 void Animacion::actualizar(float dt, const Grafo& grafo) {
@@ -157,7 +160,6 @@ void Animacion::dibujarAvion(sf::RenderWindow& ventana, const AvionAnimado& avio
 	estela.setFillColor(sf::Color(avion.color.r, avion.color.g, avion.color.b, 90));
 	ventana.draw(estela);
 	
-	
 	sf::ConvexShape avionGeom(5);
 	avionGeom.setPoint(0, sf::Vector2f( 14.0f,   0.0f)); 
 	avionGeom.setPoint(1, sf::Vector2f( -4.0f,  11.0f)); 
@@ -171,7 +173,6 @@ void Animacion::dibujarAvion(sf::RenderWindow& ventana, const AvionAnimado& avio
 	avionGeom.setOutlineColor(sf::Color::White);
 	avionGeom.setOutlineThickness(1.2f);
 	ventana.draw(avionGeom);
-	
 	
 	Dibujo::dibujarTexto(ventana, avion.etiqueta, avion.posActual.x, avion.posActual.y - 18.0f, 10, avion.color, true);
 }

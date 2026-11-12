@@ -1,4 +1,5 @@
 #include "Dibujo.h"
+#include "Grafo.h"
 #include <cmath>
 
 sf::Font Dibujo::fuentePrincipal;
@@ -22,9 +23,9 @@ bool Dibujo::inicializarFuente() {
 
 	const string rutas[] = {
 		"arial.ttf",
-			"C:/Windows/Fonts/arial.ttf",
-			"C:/Windows/Fonts/segoeui.ttf",
-			"C:/Windows/Fonts/tahoma.ttf"
+		"C:/Windows/Fonts/arial.ttf",
+		"C:/Windows/Fonts/segoeui.ttf",
+		"C:/Windows/Fonts/tahoma.ttf"
 	};
 	for (int i = 0; i < 4; i++) {
 		if (fuentePrincipal.loadFromFile(rutas[i])) {
@@ -40,6 +41,39 @@ const sf::Font& Dibujo::getFuente() {
 		inicializarFuente();
 	}
 	return fuentePrincipal;
+}
+
+sf::Vector2f Dibujo::proyectarCiudad(const Ciudad& ciudad, const Grafo& grafo) {
+	int total = grafo.getCantidadCiudades();
+	if (total <= 0) {
+		return sf::Vector2f(ciudad.posX, ciudad.posY);
+	}
+	if (total == 1) {
+		return sf::Vector2f(760.0f, 290.0f);
+	}
+	
+	float minX = 999999.0f, maxX = -999999.0f;
+	float minY = 999999.0f, maxY = -999999.0f;
+	for (int i = 0; i < total; i++) {
+		Ciudad c = grafo.getCiudad(i);
+		if (c.posX < minX) minX = c.posX;
+		if (c.posX > maxX) maxX = c.posX;
+		if (c.posY < minY) minY = c.posY;
+		if (c.posY > maxY) maxY = c.posY;
+	}
+	
+	float spanX = maxX - minX;
+	float spanY = maxY - minY;
+	
+	float normX = (spanX > 0.001f) ? ((ciudad.posX - minX) / spanX) : 0.5f;
+	float normY = (spanY > 0.001f) ? ((ciudad.posY - minY) / spanY) : 0.5f;
+	
+	// Canvas bounds: margen horizontal [320, 1205], margen vertical [105, 480]
+	// Evita colisiones con barra lateral (0-250) y panel inferior (535-715)
+	float px = 320.0f + normX * 885.0f;
+	float py = 105.0f + normY * 375.0f;
+	
+	return sf::Vector2f(px, py);
 }
 
 void Dibujo::dibujarPanel(sf::RenderWindow& ventana, float x, float y, float ancho, float alto, 
@@ -72,11 +106,11 @@ void Dibujo::dibujarTexto(sf::RenderWindow& ventana, const string& texto, float 
 }
 
 void Dibujo::dibujarVerticeCiudad(sf::RenderWindow& ventana, const Ciudad& ciudad, 
-								  bool seleccionada, bool hover) {
+								  sf::Vector2f pos, bool seleccionada, bool hover) {
 	float radio = 16.0f;
 	sf::CircleShape circulo(radio);
 	circulo.setOrigin(radio, radio);
-	circulo.setPosition(ciudad.posX, ciudad.posY);
+	circulo.setPosition(pos.x, pos.y);
 	
 	if (seleccionada) {
 		circulo.setFillColor(COLOR_CIAN_ACENTO);
@@ -94,9 +128,13 @@ void Dibujo::dibujarVerticeCiudad(sf::RenderWindow& ventana, const Ciudad& ciuda
 	ventana.draw(circulo);
 	
 	sf::Color colorTexto = seleccionada ? sf::Color(10, 15, 26) : COLOR_TEXTO_TITULO;
-	dibujarTexto(ventana, ciudad.codigo, ciudad.posX, ciudad.posY, 11, colorTexto, true);
-	
-	dibujarTexto(ventana, ciudad.nombre, ciudad.posX, ciudad.posY + radio + 3.0f, 10, COLOR_TEXTO_MUTED, true);
+	dibujarTexto(ventana, ciudad.codigo, pos.x, pos.y, 11, colorTexto, true);
+	dibujarTexto(ventana, ciudad.nombre, pos.x, pos.y + radio + 3.0f, 10, COLOR_TEXTO_MUTED, true);
+}
+
+void Dibujo::dibujarVerticeCiudad(sf::RenderWindow& ventana, const Ciudad& ciudad, 
+								  bool seleccionada, bool hover) {
+	dibujarVerticeCiudad(ventana, ciudad, sf::Vector2f(ciudad.posX, ciudad.posY), seleccionada, hover);
 }
 
 void Dibujo::dibujarFlechaDirigida(sf::RenderWindow& ventana, float x1, float y1, float x2, float y2, 
