@@ -7,6 +7,7 @@
 class Dijkstra {
 public:
 	static ResultadoRuta calcularRuta(const Grafo& grafo, int origen, int destino, int criterio, int ignorarOrigen = -1, int ignorarDestino = -1);
+	static ResultadoRuta calcularRutaConEscala(const Grafo& grafo, int origen, int escala, int destino, int criterio);
 	static ResultadoRuta calcularRutaEquipaje(const Grafo& grafo, int origen, int destino, int criterioEquipaje, const ResultadoRuta& rutaPasajero);
 };
 

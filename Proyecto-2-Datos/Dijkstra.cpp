@@ -102,6 +102,44 @@ ResultadoRuta Dijkstra::calcularRuta(const Grafo& grafo, int origen, int destino
 	return res;
 }
 
-ResultadoRuta Dijkstra::calcularRutaEquipaje(const Grafo& grafo, int origen, int destino, int criterioEquipaje, const ResultadoRuta& rutaPasajero) {
+ResultadoRuta Dijkstra::calcularRutaConEscala(const Grafo& grafo, int origen, int escala, int destino, int criterio) {
+	if (escala == -1 || escala == origen || escala == destino) {
+		return calcularRuta(grafo, origen, destino, criterio);
+	}
+	
+	ResultadoRuta r1 = calcularRuta(grafo, origen, escala, criterio);
+	ResultadoRuta r2 = calcularRuta(grafo, escala, destino, criterio);
+	
+	ResultadoRuta res;
+	res.existe = false;
+	res.cicloNegativo = false;
+	res.cantidadNodos = 0;
+	res.costoTotal = 0.0;
+	res.duracionTotal = 0.0;
+	res.escalas = 0;
+	
+	if (!r1.existe || !r2.existe) {
+		return res;
+	}
+	
+	for (int i = 0; i < r1.cantidadNodos; i++) {
+		if (res.cantidadNodos < MAX_CIUDADES) {
+			res.nodos[res.cantidadNodos++] = r1.nodos[i];
+		}
+	}
+	for (int i = 1; i < r2.cantidadNodos; i++) {
+		if (res.cantidadNodos < MAX_CIUDADES) {
+			res.nodos[res.cantidadNodos++] = r2.nodos[i];
+		}
+	}
+	
+	res.costoTotal = r1.costoTotal + r2.costoTotal;
+	res.duracionTotal = r1.duracionTotal + r2.duracionTotal;
+	res.escalas = (res.cantidadNodos >= 2) ? (res.cantidadNodos - 2) : 0;
+	res.existe = true;
+	return res;
+}
+
+ResultadoRuta Dijkstra::calcularRutaEquipaje(const Grafo& grafo, int origen, int destino, int criterioEquipaje, const ResultadoRuta& /*rutaPasajero*/) {
 	return calcularRuta(grafo, origen, destino, criterioEquipaje);
 }

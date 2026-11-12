@@ -5,27 +5,28 @@
 sf::Font Dibujo::fuentePrincipal;
 bool Dibujo::fuenteCargada = false;
 
-const sf::Color Dibujo::COLOR_FONDO          = sf::Color(15, 20, 32);
-const sf::Color Dibujo::COLOR_PANEL          = sf::Color(24, 32, 48);
-const sf::Color Dibujo::COLOR_BORDE          = sf::Color(45, 58, 82);
-const sf::Color Dibujo::COLOR_TEXTO_TITULO   = sf::Color(255, 255, 255);
-const sf::Color Dibujo::COLOR_TEXTO_CUERPO   = sf::Color(220, 228, 240);
-const sf::Color Dibujo::COLOR_TEXTO_MUTED    = sf::Color(140, 155, 180);
-const sf::Color Dibujo::COLOR_CIAN_ACENTO    = sf::Color(56, 189, 248);
-const sf::Color Dibujo::COLOR_NARANJA_EQUIPAJE = sf::Color(251, 146, 60);
-const sf::Color Dibujo::COLOR_VERDE_EXITO    = sf::Color(34, 197, 94);
-const sf::Color Dibujo::COLOR_ROJO_ALERTA    = sf::Color(239, 68, 68);
+// Paleta: Gris muy oscuro con acentos Naranja Amarillento (Ámbar)
+const sf::Color Dibujo::COLOR_FONDO            = sf::Color(18, 18, 20);      // Gris antracita muy oscuro
+const sf::Color Dibujo::COLOR_PANEL            = sf::Color(28, 28, 32);      // Gris carbón para paneles
+const sf::Color Dibujo::COLOR_BORDE            = sf::Color(54, 54, 62);      // Borde gris neutro
+const sf::Color Dibujo::COLOR_TEXTO_TITULO     = sf::Color(255, 255, 255);   // Blanco puro
+const sf::Color Dibujo::COLOR_TEXTO_CUERPO     = sf::Color(228, 228, 232);   // Gris claro suave
+const sf::Color Dibujo::COLOR_TEXTO_MUTED      = sf::Color(148, 148, 158);   // Gris medio
+const sf::Color Dibujo::COLOR_CIAN_ACENTO      = sf::Color(251, 191, 36);    // Naranja amarillento / Ámbar brillante
+const sf::Color Dibujo::COLOR_NARANJA_EQUIPAJE = sf::Color(249, 115, 22);    // Naranja intenso para equipaje
+const sf::Color Dibujo::COLOR_VERDE_EXITO      = sf::Color(34, 197, 94);     // Verde éxito
+const sf::Color Dibujo::COLOR_ROJO_ALERTA      = sf::Color(239, 68, 68);     // Rojo alerta
 
 bool Dibujo::inicializarFuente() {
 	if (fuenteCargada) {
 		return true;
 	}
-
+	
 	const string rutas[] = {
 		"arial.ttf",
-		"C:/Windows/Fonts/arial.ttf",
-		"C:/Windows/Fonts/segoeui.ttf",
-		"C:/Windows/Fonts/tahoma.ttf"
+			"C:/Windows/Fonts/arial.ttf",
+			"C:/Windows/Fonts/segoeui.ttf",
+			"C:/Windows/Fonts/tahoma.ttf"
 	};
 	for (int i = 0; i < 4; i++) {
 		if (fuentePrincipal.loadFromFile(rutas[i])) {
@@ -68,8 +69,6 @@ sf::Vector2f Dibujo::proyectarCiudad(const Ciudad& ciudad, const Grafo& grafo) {
 	float normX = (spanX > 0.001f) ? ((ciudad.posX - minX) / spanX) : 0.5f;
 	float normY = (spanY > 0.001f) ? ((ciudad.posY - minY) / spanY) : 0.5f;
 	
-	// Canvas bounds: margen horizontal [320, 1205], margen vertical [105, 480]
-	// Evita colisiones con barra lateral (0-250) y panel inferior (535-715)
 	float px = 320.0f + normX * 885.0f;
 	float py = 105.0f + normY * 375.0f;
 	
@@ -117,7 +116,7 @@ void Dibujo::dibujarVerticeCiudad(sf::RenderWindow& ventana, const Ciudad& ciuda
 		circulo.setOutlineColor(sf::Color::White);
 		circulo.setOutlineThickness(3.0f);
 	} else if (hover) {
-		circulo.setFillColor(sf::Color(38, 52, 78));
+		circulo.setFillColor(sf::Color(48, 48, 56));
 		circulo.setOutlineColor(COLOR_CIAN_ACENTO);
 		circulo.setOutlineThickness(2.0f);
 	} else {
@@ -127,7 +126,7 @@ void Dibujo::dibujarVerticeCiudad(sf::RenderWindow& ventana, const Ciudad& ciuda
 	}
 	ventana.draw(circulo);
 	
-	sf::Color colorTexto = seleccionada ? sf::Color(10, 15, 26) : COLOR_TEXTO_TITULO;
+	sf::Color colorTexto = seleccionada ? sf::Color(18, 18, 20) : COLOR_TEXTO_TITULO;
 	dibujarTexto(ventana, ciudad.codigo, pos.x, pos.y, 11, colorTexto, true);
 	dibujarTexto(ventana, ciudad.nombre, pos.x, pos.y + radio + 3.0f, 10, COLOR_TEXTO_MUTED, true);
 }

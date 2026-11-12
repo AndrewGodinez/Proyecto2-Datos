@@ -58,7 +58,7 @@ void App::inicializarMenuLateral() {
 		float offsetY = (i >= PESTANA_FLOTA_ADMIN) ? 22.0f : 0.0f;
 		float y = inicioY + (i * espaciado) + offsetY;
 		botonesMenu[i] = Boton(12.0f, y, 228.0f, 36.0f, nombresMenu[i], 
-							   sf::Color(20, 26, 40), sf::Color(32, 44, 66));
+							   sf::Color(28, 28, 34), sf::Color(44, 44, 52), Dibujo::COLOR_TEXTO_TITULO);
 	}
 	botonesMenu[PESTANA_DIJKSTRA].setActivo(true);
 	
@@ -149,7 +149,7 @@ void App::actualizar(float dt) {
 
 void App::dibujarBarraSuperior() {
 	Dibujo::dibujarPanel(ventana, 0.0f, 0.0f, ANCHO_VENTANA, 50.0f, 
-						 sf::Color(18, 24, 38), Dibujo::COLOR_BORDE, 1.0f);
+						 sf::Color(24, 24, 28), Dibujo::COLOR_BORDE, 1.0f);
 	
 	Dibujo::dibujarTexto(ventana, "AEROLINEA UNA - GESTION Y RUTAS AEREAS", 16.0f, 15.0f, 16, Dibujo::COLOR_TEXTO_TITULO);
 	Dibujo::dibujarTexto(ventana, "EIF207 Estructuras de Datos", 440.0f, 18.0f, 12, Dibujo::COLOR_TEXTO_MUTED);
@@ -162,7 +162,7 @@ void App::dibujarBarraSuperior() {
 
 void App::dibujarMenuLateral() {
 	Dibujo::dibujarPanel(ventana, 0.0f, 50.0f, 250.0f, ALTO_VENTANA - 50.0f, 
-						 sf::Color(14, 18, 28), Dibujo::COLOR_BORDE, 1.0f);
+						 sf::Color(22, 22, 26), Dibujo::COLOR_BORDE, 1.0f);
 	
 	Dibujo::dibujarTexto(ventana, "MODULO DEL CLIENTE", 16.0f, 68.0f, 11, Dibujo::COLOR_CIAN_ACENTO);
 	
@@ -189,7 +189,7 @@ void App::dibujar() {
 	}
 	
 	Dibujo::dibujarPanel(ventana, 255.0f, 535.0f, 1015.0f, 180.0f, 
-						 sf::Color(18, 24, 38), Dibujo::COLOR_BORDE, 1.0f);
+						 sf::Color(26, 26, 30), Dibujo::COLOR_BORDE, 1.0f);
 	
 	if (pestanaActual <= PESTANA_RESERVA_VUELO && pantallasCliente != nullptr) {
 		pantallasCliente->dibujar(ventana, *this);
